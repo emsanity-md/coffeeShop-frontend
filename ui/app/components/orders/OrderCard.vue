@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed } from 'vue'
 import type { Order, CustomerReceipt } from '~/composables/useOrders'
 import type { CartItem } from '~/types/menu'
 
@@ -10,8 +10,6 @@ const emit = defineEmits<{
   (e: 'delete', id: string): void
 }>()
 
-const showDeleteModal = ref(false)
-
 function formatDate(dateStr: string) {
   return new Date(dateStr).toLocaleString('en-PH', {
     year: 'numeric',
@@ -20,11 +18,6 @@ function formatDate(dateStr: string) {
     hour: '2-digit',
     minute: '2-digit',
   })
-}
-
-function confirmDelete() {
-  showDeleteModal.value = false
-  emit('delete', props.order.id)
 }
 
 // Get all unique items across all customers
@@ -68,28 +61,8 @@ const allItems = computed((): CartItem[] => {
         variant="ghost"
         color="error"
         icon="i-heroicons-trash"
-        @click="showDeleteModal = true"
+        @click="$emit('delete', order.id)"
       />
-
-    <!-- Delete Confirmation Modal -->
-    <UModal :open="showDeleteModal" @close="showDeleteModal = false">
-      <template #content>
-        <div class="p-6 space-y-4 text-center">
-          <p class="text-lg font-medium" style="color: var(--text-primary)">Delete this order?</p>
-          <p class="text-sm" style="color: var(--text-muted)">
-            This action cannot be undone.
-          </p>
-          <div class="flex gap-2 justify-center">
-            <UButton color="neutral" variant="outline" @click="showDeleteModal = false">
-              Cancel
-            </UButton>
-            <UButton color="error" @click="confirmDelete">
-              Delete
-            </UButton>
-          </div>
-        </div>
-      </template>
-    </UModal>
     </div>
 
     <div class="border-t border-dashed" style="border-color: var(--border-color)" />
