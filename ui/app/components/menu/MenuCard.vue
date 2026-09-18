@@ -9,7 +9,7 @@ defineEmits<{ (e: 'add', id: number): void }>()
   <div
     class="relative w-full h-70 rounded-xl overflow-hidden cursor-pointer"
     style="background: var(--bg-sidebar)"
-    @click="$emit('add', item.id)"
+    @click.self="$emit('add', item.id)"
   >
     <!-- Image or icon -->
     <img
