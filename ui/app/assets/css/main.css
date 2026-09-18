@@ -1,0 +1,30 @@
+@import "tailwindcss";
+@import "@nuxt/ui";
+
+/* Dark mode */
+.dark {
+  --bg-app: #0f0d0b;
+  --bg-sidebar: #1a1612;
+  --bg-topbar: #141210;
+  --bg-card: #1a1612;
+  --bg-cart: #141210;
+  --border-color: #2e2820;
+  --text-primary: #e8ddd0;
+  --text-muted: #a89880;
+  --text-faint: #5a4e44;
+  --accent: #c9a96e;
+}
+
+/* Light mode */
+.light {
+  --bg-app: #f5f0eb;
+  --bg-sidebar: #ffffff;
+  --bg-topbar: #faf7f4;
+  --bg-card: #ffffff;
+  --bg-cart: #faf7f4;
+  --border-color: #e2d9d0;
+  --text-primary: #1a1210;
+  --text-muted: #6b5e54;
+  --text-faint: #a89880;
+  --accent: #9a6f3a;
+}
