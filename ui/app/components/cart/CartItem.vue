@@ -2,7 +2,10 @@
 import type { CartItem } from '~/types/menu'
 
 defineProps<{ item: CartItem }>()
-defineEmits<{ (e: 'changeQty', id: number, delta: number): void }>()
+defineEmits<{
+  (e: 'changeQty', id: number, delta: number): void
+  (e: 'remove', id: number): void
+}>()
 </script>
 
 <template>
@@ -32,7 +35,7 @@ defineEmits<{ (e: 'changeQty', id: number, delta: number): void }>()
       color="error"
       icon="i-heroicons-x-mark"
       class="absolute top-1 right-1 z-10"
-      @click="$emit('changeQty', item.id, -999)"
+      @click="$emit('remove', item.id)"
     />
 
     <!-- Name + price + qty — bottom -->

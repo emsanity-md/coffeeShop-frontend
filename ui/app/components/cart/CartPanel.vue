@@ -1,15 +1,54 @@
 <script setup lang="ts">
-import type { CartItem } from '~/types/menu'
+import { ref, computed } from 'vue'
+import type { CartItem, Customer } from '~/types/menu'
+import { useOrders } from '~/composables/useOrders'
+import type { CustomerReceipt } from '~/composables/useOrders'
 
-defineProps<{
+const props = defineProps<{
   cartItems: CartItem[]
   cartCount: number
-  subtotal: number
-  tax: number
   total: number
+  customers: Customer[]
 }>()
 
-defineEmits<{ (e: 'changeQty', id: number, delta: number): void }>()
+const emit = defineEmits<{
+  (e: 'changeQty', id: number, delta: number): void
+  (e: 'remove', id: number): void
+  (e: 'clearCart'): void
+}>()
+
+const showReceipt = ref(false)
+const selectedCustomerReceipt = ref<CustomerReceipt | null>(null)
+const { addOrder } = useOrders()
+
+const customerReceipts = computed((): CustomerReceipt[] => {
+  if (!props.customers.length) return []
+  
+  return props.customers.map(c => ({
+    id: c.id,
+    name: c.name,
+    items: props.cartItems,
+    total: props.total,
+  }))
+})
+
+function handlePlaceOrder() {
+  if (!props.cartItems.length || !props.customers.length) return
+  const receipts = customerReceipts.value
+  if (!receipts.length) return
+  addOrder(receipts, props.total, false)
+  emit('clearCart')
+  const firstReceipt = receipts[0]
+  if (firstReceipt) {
+    selectedCustomerReceipt.value = firstReceipt
+    showReceipt.value = true
+  }
+}
+
+function viewCustomerReceipt(receipt: CustomerReceipt) {
+  selectedCustomerReceipt.value = receipt
+  showReceipt.value = true
+}
 </script>
 
 <template>
@@ -28,22 +67,45 @@ defineEmits<{ (e: 'changeQty', id: number, delta: number): void }>()
         Your cart is empty
       </div>
 
-      <!-- 2 column grid -->
       <div class="grid grid-cols-2 gap-2">
         <CartItem
           v-for="item in cartItems"
           :key="item.id"
           :item="item"
           @change-qty="(id, delta) => $emit('changeQty', id, delta)"
+          @remove="$emit('remove', $event)"
         />
+      </div>
+
+      <div v-if="customers.length" class="mt-4 space-y-2 border-t pt-3" style="border-color: var(--border-color)">
+        <div v-for="receipt in customerReceipts" :key="receipt.id" class="flex justify-between text-xs" style="color: var(--text-primary)">
+          <span class="font-medium">{{ receipt.name }}</span>
+          <span>₱{{ receipt.total.toFixed(2) }}</span>
+        </div>
+        <div class="flex justify-between text-xs font-medium pt-1 border-t" style="border-color: var(--border-color); color: var(--text-primary)">
+          <span>Total</span>
+          <span>₱{{ total.toFixed(2) }}</span>
+        </div>
       </div>
     </div>
 
     <CartFooter
       v-if="cartItems.length"
-      :subtotal="subtotal"
-      :tax="tax"
+      :items="cartItems"
       :total="total"
+      @place-order="handlePlaceOrder"
     />
+
+    <ReceiptModal
+      v-if="selectedCustomerReceipt"
+      :open="showReceipt"
+      :customer-name="selectedCustomerReceipt.name"
+      :items="selectedCustomerReceipt.items"
+      :total="selectedCustomerReceipt.total"
+      :is-split="customers.length > 1"
+      :split-total="total"
+      @close="showReceipt = false"
+    />
+
   </aside>
 </template>

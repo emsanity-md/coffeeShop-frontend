@@ -11,3 +11,14 @@ export interface MenuItem {
 export interface CartItem extends MenuItem {
   qty: number
 }
+
+export interface Customer {
+  id: string
+  name: string
+  items: number[]  // menu item IDs assigned to this customer
+}
+
+export interface SplitOrder {
+  customers: Customer[]
+  splitEqually: boolean
+}
