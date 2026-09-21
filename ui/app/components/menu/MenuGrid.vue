@@ -11,33 +11,45 @@ defineEmits<{ (e: 'add', id: number): void }>()
 </script>
 
 <template>
-  <div class="flex-1 overflow-y-auto p-5 space-y-6">
+  <div class="flex-1 overflow-y-auto overscroll-contain p-3 sm:p-4 lg:p-5 space-y-5 sm:space-y-6">
+
+    <div v-if="!items.length" class="anim-fade-up px-2">
+      <UAlert
+        color="neutral"
+        variant="soft"
+        icon="i-heroicons-magnifying-glass"
+        title="No items found"
+        description="Try a different search or category."
+      />
+    </div>
 
     <!-- Grouped view -->
-    <template v-if="groupedItems">
-      <div v-for="(group, cat) in groupedItems" :key="cat">
-        <p class="text-xs text-[#a89880] font-medium mb-3">{{ catLabels[cat] }}</p>
-        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+    <template v-else-if="groupedItems">
+      <div v-for="(group, cat) in groupedItems" :key="cat" class="anim-fade-in">
+        <p class="text-xs font-medium mb-2 sm:mb-3 tracking-wide" style="color: var(--text-muted)">{{ catLabels[cat] }}</p>
+        <TransitionGroup name="menu-card" tag="div" class="relative grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-3">
           <MenuCard
-            v-for="item in group"
+            v-for="(item, i) in group"
             :key="item.id"
             :item="item"
+            :style="{ '--stagger': `${Math.min(i, 10) * 32}ms` }"
             @add="$emit('add', $event)"
           />
-        </div>
+        </TransitionGroup>
       </div>
     </template>
 
     <!-- Filtered single category view -->
     <template v-else>
-      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+      <TransitionGroup name="menu-card" tag="div" class="relative grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-3">
         <MenuCard
-          v-for="item in items"
+          v-for="(item, i) in items"
           :key="item.id"
           :item="item"
+          :style="{ '--stagger': `${Math.min(i, 12) * 32}ms` }"
           @add="$emit('add', $event)"
         />
-      </div>
+      </TransitionGroup>
     </template>
 
   </div>

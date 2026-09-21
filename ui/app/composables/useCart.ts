@@ -1,4 +1,4 @@
-import { ref, computed, watch } from 'vue'
+import { computed, watch } from 'vue'
 import type { MenuItem } from '~/types/menu'
 
 const CART_STORAGE_KEY = 'coffee_shop_cart'
@@ -19,7 +19,14 @@ function saveCart(cart: Record<number, number>) {
 }
 
 export function useCart(menu: MenuItem[]) {
-  const cart = ref<Record<number, number>>(loadCart())
+  const cart = useState<Record<number, number>>(CART_STORAGE_KEY, () => ({}))
+
+  if (import.meta.client) {
+    const stored = loadCart()
+    if (Object.keys(stored).length > 0 && Object.keys(cart.value).length === 0) {
+      cart.value = stored
+    }
+  }
 
   watch(cart, (newCart) => {
     saveCart(newCart)

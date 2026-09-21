@@ -1,7 +1,7 @@
 [
   { "id": 1, "name": "Espresso", "desc": "Strong & bold", "price": 85, "cat": "coffee", "icon": "☕", "image": "/images/Espresso.png" },
   { "id": 2, "name": "Cappuccino", "desc": "Espresso with foam", "price": 130, "cat": "coffee", "icon": "☕", "image": "/images/Capuccino.png" },
-  { "id": 3, "name": "Latte", "desc": "Smooth milk coffee", "price": 140, "cat": "coffee", "icon": "🥛", "image": "/images/latte.png" },
+  { "id": 3, "name": "Latte", "desc": "Smooth milk coffee", "price": 140, "cat": "coffee", "icon": "🥛", "image": "/images/Latte.png" },
   { "id": 4, "name": "Americano", "desc": "Espresso & water", "price": 110, "cat": "coffee", "icon": "☕", "image": "/images/Americano.png" },
   { "id": 5, "name": "Cold brew", "desc": "Slow steeped 12hr", "price": 160, "cat": "cold", "icon": "🧊" },
   { "id": 6, "name": "Matcha latte", "desc": "Japanese green tea", "price": 150, "cat": "tea", "icon": "🍵" },
