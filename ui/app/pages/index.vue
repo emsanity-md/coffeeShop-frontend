@@ -1,8 +1,10 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import type { MenuItem, Customer } from '~/types/menu'
 import menuData from '~/data/menu.json'
 import categoriesData from '~/data/categories.json'
+
+const DISCLAIMER_STORAGE_KEY = 'coffee_shop_disclaimer_dismissed'
 
 const menu: MenuItem[] = menuData
 const categories = categoriesData
@@ -29,6 +31,7 @@ const showNameModal = ref(false)
 const editingCustomerId = ref<string | null>(null)
 const showMobileMenu = ref(false)
 const showMobileCart = ref(false)
+const showDisclaimerModal = ref(false)
 
 function openNameModal() {
   nameInput.value = ''
@@ -100,6 +103,32 @@ function handleCategorySelect(val: string) {
   activeCategory.value = val
   showMobileMenu.value = false
 }
+
+function dismissDisclaimer() {
+  showDisclaimerModal.value = false
+}
+
+function dismissDisclaimerPermanently() {
+  if (import.meta.client) {
+    try { localStorage.setItem(DISCLAIMER_STORAGE_KEY, '1') } catch {}
+  }
+  showDisclaimerModal.value = false
+}
+
+function openDisclaimerModal() {
+  showDisclaimerModal.value = true
+}
+
+onMounted(() => {
+  if (import.meta.client) {
+    try {
+      const dismissed = localStorage.getItem(DISCLAIMER_STORAGE_KEY)
+      if (!dismissed) showDisclaimerModal.value = true
+    } catch {
+      showDisclaimerModal.value = true
+    }
+  }
+})
 </script>
 
 <template>
@@ -154,6 +183,63 @@ function handleCategorySelect(val: string) {
       </template>
     </UModal>
 
+    <!-- Prototype disclaimer — no real data collected -->
+    <UModal :open="showDisclaimerModal" :dismissible="true" @close="dismissDisclaimer">
+      <template #content>
+        <div class="p-4 sm:p-6 space-y-4 max-w-full">
+          <div class="flex items-start justify-between gap-3">
+            <div class="flex items-center gap-3 min-w-0">
+              <div class="w-9 h-9 rounded-full flex items-center justify-center shrink-0 bg-primary/10">
+                <UIcon name="i-heroicons-shield-check" class="w-5 h-5 text-primary" />
+              </div>
+              <div class="min-w-0">
+                <p class="text-sm font-semibold leading-tight" style="color: var(--text-primary)">Prototype — No real data will be collected</p>
+                <p class="text-xs" style="color: var(--text-muted)">Demo & UI preview only</p>
+              </div>
+            </div>
+            <UButton
+              variant="ghost"
+              color="neutral"
+              icon="i-heroicons-x-mark"
+              size="xs"
+              aria-label="Close disclaimer"
+              @click="dismissDisclaimer"
+            />
+          </div>
+
+          <div class="rounded-lg border p-3 sm:p-4 space-y-3" style="background: var(--bg-soft); border-color: var(--border-color)">
+            <div class="flex gap-2.5">
+              <UIcon name="i-heroicons-information-circle" class="w-4 h-4 mt-0.5 shrink-0 text-primary" />
+              <p class="text-xs sm:text-sm leading-relaxed" style="color: var(--text-primary)">
+                This is a <span class="font-semibold">prototype</span> build. No real personal or payment data is collected, stored, or transmitted to any server.
+              </p>
+            </div>
+            <ul class="space-y-1.5 text-xs sm:text-sm list-disc pl-5" style="color: var(--text-muted)">
+              <li><span class="font-medium" style="color: var(--text-primary)">Local only:</span> Cart, customer names, and orders are saved only in your browser's <code class="px-1 py-0.5 rounded text-xs" style="background: var(--bg-app); border: 1px solid var(--border-color)">localStorage</code> and never sent anywhere.</li>
+              <li><span class="font-medium" style="color: var(--text-primary)">No backend:</span> Menu and orders use static demo data. Prices and totals are mock values (₱).</li>
+              <li><span class="font-medium" style="color: var(--text-primary)">No tracking:</span> No analytics, cookies, or third-party tracking in this prototype. Clearing site data removes all demo orders.</li>
+              <li>Use any placeholder names for testing — do not enter real personal information.</li>
+            </ul>
+            <p class="text-[11px] leading-relaxed" style="color: var(--text-faint)">
+              Production would add a secure backend, encrypted storage, authentication, and a payment provider before handling real data. See README for the production roadmap.
+            </p>
+          </div>
+
+          <div class="flex flex-col sm:flex-row gap-2">
+            <UButton block color="primary" icon="i-heroicons-check" @click="dismissDisclaimer">
+              I understand — continue to demo
+            </UButton>
+            <UButton block color="neutral" variant="outline" @click="dismissDisclaimerPermanently">
+              Don't show again
+            </UButton>
+          </div>
+          <p class="text-[11px] text-center" style="color: var(--text-faint)">
+            You can reopen this notice anytime via the <span class="font-medium">Privacy notice</span> link at the bottom of the menu.
+          </p>
+        </div>
+      </template>
+    </UModal>
+
     <!-- Desktop sidebar -->
     <div class="hidden lg:flex shrink-0">
       <MenuSidebar
@@ -200,6 +286,20 @@ function handleCategorySelect(val: string) {
         :cat-labels="catLabels"
         @add="addToCart"
       />
+      <div class="shrink-0 px-3 py-2 border-t flex items-center justify-center gap-2" style="background: var(--bg-topbar); border-color: var(--border-color)">
+        <UIcon name="i-heroicons-shield-check" class="w-3.5 h-3.5 shrink-0" style="color: var(--text-faint)" />
+        <p class="text-[11px] hidden sm:inline" style="color: var(--text-faint)">Prototype — No real data will be collected.</p>
+        <p class="text-[11px] sm:hidden" style="color: var(--text-faint)">Prototype — demo only.</p>
+        <UButton
+          variant="ghost"
+          color="neutral"
+          size="xs"
+          class="h-6 text-[11px] px-2"
+          @click="openDisclaimerModal"
+        >
+          Privacy notice
+        </UButton>
+      </div>
     </main>
 
     <!-- Desktop cart -->
