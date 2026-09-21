@@ -1,0 +1,14 @@
+[
+  { "id": 1, "name": "Espresso", "desc": "Strong & bold", "price": 85, "cat": "coffee", "icon": "☕", "image": "/images/Espresso.png" },
+  { "id": 2, "name": "Cappuccino", "desc": "Espresso with foam", "price": 130, "cat": "coffee", "icon": "☕", "image": "/images/Capuccino.png" },
+  { "id": 3, "name": "Latte", "desc": "Smooth milk coffee", "price": 140, "cat": "coffee", "icon": "🥛", "image": "/images/Latte.png" },
+  { "id": 4, "name": "Americano", "desc": "Espresso & water", "price": 110, "cat": "coffee", "icon": "☕", "image": "/images/Americano.png" },
+  { "id": 5, "name": "Cold brew", "desc": "Slow steeped 12hr", "price": 160, "cat": "cold", "icon": "🧊" },
+  { "id": 6, "name": "Matcha latte", "desc": "Japanese green tea", "price": 150, "cat": "tea", "icon": "🍵" },
+  { "id": 7, "name": "Earl grey", "desc": "Classic bergamot", "price": 100, "cat": "tea", "icon": "🫖" },
+  { "id": 8, "name": "Croissant", "desc": "Butter, flaky", "price": 95, "cat": "pastry", "icon": "🥐" },
+  { "id": 9, "name": "Muffin", "desc": "Blueberry or choco", "price": 80, "cat": "pastry", "icon": "🧁" },
+  { "id": 10, "name": "Iced mocha", "desc": "Chilled & creamy", "price": 155, "cat": "cold", "icon": "🧃" },
+  { "id": 11, "name": "Flat white", "desc": "Velvety microfoam", "price": 135, "cat": "coffee", "icon": "☕", "image": "/images/flat white.png" },
+  { "id": 12, "name": "Chai latte", "desc": "Spiced & warming", "price": 125, "cat": "tea", "icon": "🍵" }
+]

@@ -1,0 +1,55 @@
+<script setup lang="ts">
+import type { CartItem } from '~/types/menu'
+
+defineProps<{ item: CartItem }>()
+defineEmits<{
+  (e: 'changeQty', id: number, delta: number): void
+  (e: 'remove', id: number): void
+}>()
+</script>
+
+<template>
+  <div class="relative rounded-xl overflow-hidden cursor-pointer group touch-manipulation"
+    style="background: var(--bg-card)">
+
+    <!-- Image or icon -->
+    <div class="w-full h-28 sm:h-32 lg:h-36 flex items-center justify-center overflow-hidden"
+      style="background: var(--bg-sidebar)">
+      <img
+        v-if="item.image"
+        :src="item.image"
+        :alt="item.name"
+        class="w-full h-full object-cover"
+        loading="lazy"
+      />
+      <span v-else class="text-xl sm:text-2xl">{{ item.icon }}</span>
+    </div>
+
+    <!-- Bottom gradient for qty controls visibility -->
+    <div class="absolute inset-x-0 bottom-0 h-20 pointer-events-none"
+      style="background: linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.5) 55%, transparent 100%)" />
+
+    <!-- X button — top right -->
+    <UButton
+      size="xs"
+      variant="soft"
+      color="error"
+      icon="i-heroicons-x-mark"
+      class="absolute top-1 right-1 z-10 min-w-7 min-h-7"
+      :aria-label="`Remove ${item.name}`"
+      @click="$emit('remove', item.id)"
+    />
+
+    <!-- Name + price + qty — bottom -->
+    <div class="absolute inset-x-0 bottom-0 p-2 z-10">
+      <p class="text-xs font-medium text-white leading-tight truncate">{{ item.name }}</p>
+      <p class="text-[11px] text-white/70 tnum">₱{{ item.price.toFixed(2) }}</p>
+      <div class="flex items-center justify-between mt-1.5 gap-1">
+        <UButton size="xs" variant="ghost" class="min-w-7 min-h-7 text-white" :aria-label="`Decrease ${item.name}`" @click="$emit('changeQty', item.id, -1)">−</UButton>
+        <span class="text-xs font-semibold text-white tnum min-w-6 text-center">{{ item.qty }}</span>
+        <UButton size="xs" variant="ghost" class="min-w-7 min-h-7 text-white" :aria-label="`Increase ${item.name}`" @click="$emit('changeQty', item.id, 1)">+</UButton>
+      </div>
+    </div>
+
+  </div>
+</template>

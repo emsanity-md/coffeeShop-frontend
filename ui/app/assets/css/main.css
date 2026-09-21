@@ -1,0 +1,301 @@
+@import "tailwindcss";
+@import "@nuxt/ui";
+
+/* Base */
+html {
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  font-feature-settings: "cv02", "cv11";
+}
+
+/* Dark mode — warm coffeehouse */
+.dark {
+  --bg-app: #0f0d0b;
+  --bg-sidebar: #1a1612;
+  --bg-topbar: rgba(20, 18, 16, 0.92);
+  --bg-card: #1a1612;
+  --bg-card-hover: #211b15;
+  --bg-cart: #141210;
+  --bg-soft: rgba(201, 169, 110, 0.1);
+  --bg-soft-strong: rgba(201, 169, 110, 0.16);
+  --border-color: #2e2820;
+  --border-soft: rgba(201, 169, 110, 0.18);
+  --text-primary: #e8ddd0;
+  --text-muted: #a89880;
+  --text-faint: #5a4e44;
+  --accent: #c9a96e;
+  --accent-strong: #dcbd85;
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.4), 0 4px 16px rgba(0, 0, 0, 0.25);
+  --shadow-lift: 0 4px 12px rgba(0, 0, 0, 0.45), 0 12px 32px rgba(0, 0, 0, 0.3);
+}
+
+/* Light mode — warm cream */
+.light {
+  --bg-app: #f5f0eb;
+  --bg-sidebar: #ffffff;
+  --bg-topbar: rgba(250, 247, 244, 0.92);
+  --bg-card: #ffffff;
+  --bg-card-hover: #fffaf3;
+  --bg-cart: #faf7f4;
+  --bg-soft: rgba(154, 111, 58, 0.08);
+  --bg-soft-strong: rgba(154, 111, 58, 0.14);
+  --border-color: #e2d9d0;
+  --border-soft: rgba(154, 111, 58, 0.2);
+  --text-primary: #1a1210;
+  --text-muted: #6b5e54;
+  --text-faint: #a89880;
+  --accent: #9a6f3a;
+  --accent-strong: #7d5a2e;
+  --shadow-card: 0 1px 2px rgba(26, 18, 16, 0.06), 0 4px 16px rgba(26, 18, 16, 0.06);
+  --shadow-lift: 0 4px 12px rgba(26, 18, 16, 0.1), 0 12px 32px rgba(26, 18, 16, 0.1);
+}
+
+/* Card lift */
+.warm-card {
+  box-shadow: var(--shadow-card);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease, border-color 0.18s ease;
+}
+.warm-card:hover {
+  box-shadow: var(--shadow-lift);
+  transform: translateY(-2px);
+  background-color: var(--bg-card-hover);
+}
+
+/* Motion tokens */
+:root {
+  --ease-warm: cubic-bezier(0.22, 1, 0.36, 1);
+  --dur-fast: 150ms;
+  --dur-med: 280ms;
+}
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes pop {
+  0% { transform: scale(0.6); }
+  60% { transform: scale(1.08); }
+  100% { transform: scale(1); }
+}
+
+.anim-fade-up {
+  animation: fade-up var(--dur-med) var(--ease-warm) both;
+  animation-delay: var(--stagger, 0ms);
+}
+.anim-fade-in {
+  animation: fade-in var(--dur-med) ease both;
+}
+.anim-pop {
+  animation: pop 240ms var(--ease-warm) both;
+}
+
+/* Press feedback */
+.anim-press {
+  transition: transform 0.12s ease;
+}
+.anim-press:active {
+  transform: scale(0.97);
+}
+
+/* Page transition (Nuxt pageTransition name="page") */
+.page-enter-active,
+.page-leave-active {
+  transition: opacity var(--dur-med) ease, transform var(--dur-med) var(--ease-warm);
+}
+.page-enter-from {
+  opacity: 0;
+  transform: translateY(8px);
+}
+.page-leave-to {
+  opacity: 0;
+  transform: translateY(-6px);
+}
+
+/* Item card — springy entrance + warm hover */
+@keyframes card-in {
+  0% { opacity: 0; transform: translateY(14px) scale(0.96); filter: blur(2px); }
+  60% { opacity: 1; }
+  100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+}
+@keyframes card-pulse {
+  0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 45%, transparent); }
+  100% { box-shadow: 0 0 0 12px transparent; }
+}
+@keyframes btn-pop {
+  0% { transform: scale(0.85); }
+  50% { transform: scale(1.18); }
+  100% { transform: scale(1); }
+}
+@keyframes icon-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+
+.menu-item {
+  border: 1px solid transparent;
+  transition: transform 0.38s var(--ease-warm), box-shadow 0.38s var(--ease-warm), border-color 0.28s ease, filter 0.3s ease;
+  will-change: transform;
+}
+.menu-item:hover {
+  transform: translateY(-5px) scale(1.015);
+  box-shadow: var(--shadow-lift);
+  border-color: var(--border-soft);
+}
+.menu-item:active {
+  transform: translateY(-1px) scale(0.985);
+}
+.menu-item .menu-card-img {
+  transition: transform 0.65s var(--ease-warm), filter 0.4s ease;
+}
+.menu-item:hover .menu-card-img {
+  transform: scale(1.07);
+}
+.menu-item .menu-card-gradient {
+  transition: opacity 0.3s ease;
+}
+.menu-item:hover .menu-card-gradient {
+  opacity: 1;
+}
+.menu-card-added {
+  animation: card-pulse 0.55s var(--ease-warm);
+}
+.btn-added {
+  animation: btn-pop 300ms var(--ease-warm);
+}
+.menu-item .menu-icon {
+  display: inline-block;
+  transition: transform 0.5s var(--ease-warm);
+}
+.menu-item:hover .menu-icon {
+  animation: icon-float 1.6s ease-in-out infinite;
+}
+
+/* Menu grid TransitionGroup — stagger via --stagger */
+.menu-card-move {
+  transition: transform 0.46s var(--ease-warm);
+}
+.menu-card-enter-active {
+  animation: card-in 0.5s var(--ease-warm) both;
+  animation-delay: var(--stagger, 0ms);
+}
+.menu-card-leave-active {
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  position: absolute;
+}
+.menu-card-enter-from { opacity: 0; }
+.menu-card-leave-to { opacity: 0; transform: scale(0.95); }
+
+/* Cart items */
+.cart-item-move,
+.cart-item-enter-active,
+.cart-item-leave-active {
+  transition: opacity 220ms var(--ease-warm), transform 220ms var(--ease-warm);
+}
+.cart-item-enter-from {
+  opacity: 0;
+  transform: translateY(8px) scale(0.97);
+}
+.cart-item-leave-to {
+  opacity: 0;
+  transform: scale(0.95);
+}
+.cart-item-leave-active {
+  position: absolute;
+}
+
+/* Orders grid */
+.order-card-move,
+.order-card-enter-active,
+.order-card-leave-active {
+  transition: opacity var(--dur-med) var(--ease-warm), transform var(--dur-med) var(--ease-warm);
+}
+.order-card-enter-from {
+  opacity: 0;
+  transform: translateY(14px) scale(0.98);
+}
+.order-card-leave-to {
+  opacity: 0;
+  transform: scale(0.97);
+}
+.order-card-leave-active {
+  position: absolute;
+}
+
+/* Status badge color/icon crossfade */
+.status-fade {
+  transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease;
+}
+
+/* Responsive helpers */
+html {
+  overflow-x: hidden;
+}
+body {
+  overflow-x: hidden;
+}
+/* Safe area for mobile browser chrome */
+@supports (height: 100dvh) {
+  .h-screen-safe {
+    height: 100dvh;
+  }
+}
+
+/* Soft panel for totals */
+.warm-soft-panel {
+  background: var(--bg-soft);
+  border: 1px solid var(--border-soft);
+}
+
+/* Tabular numbers for prices */
+.tnum {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Subtle scrollbars */
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+*::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 8px;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Focus visibility */
+:where(button, a, input):focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .page-enter-from,
+  .page-leave-to,
+  .menu-card-enter-from,
+  .order-card-enter-from,
+  .cart-item-enter-from {
+    transform: none !important;
+  }
+  .menu-item:hover {
+    transform: none !important;
+  }
+  .menu-item:hover .menu-card-img {
+    transform: none !important;
+  }
+}

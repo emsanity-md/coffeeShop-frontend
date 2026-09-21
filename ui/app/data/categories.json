@@ -1,0 +1,7 @@
+[
+  { "key": "all", "label": "All items" },
+  { "key": "coffee", "label": "Coffee" },
+  { "key": "tea", "label": "Tea" },
+  { "key": "pastry", "label": "Pastries" },
+  { "key": "cold", "label": "Cold drinks" }
+]
