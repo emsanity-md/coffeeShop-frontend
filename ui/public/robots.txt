@@ -1,2 +1,10 @@
-User-Agent: *
-Disallow:
+User-agent: *
+# Prototype — deployed builds should be labelled staging only.
+# Uncomment once a production origin is set and the roadmap is complete:
+# Allow: /
+# Disallow: /pos
+# Disallow: /orders
+
+# Nothing is indexable yet; the landing page carries a noindex via useSeoMeta
+# only if you add one. Until then this file simply declines all crawlers.
+Disallow: /

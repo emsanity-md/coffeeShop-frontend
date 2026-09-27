@@ -1,55 +1,94 @@
 <script setup lang="ts">
+/**
+ * A single line in the cart.
+ *
+ * Compact card layout rather than the previous image tile: the controls need a
+ * predictable hit target on a phone, and a 4:3 photo per line made the list
+ * twice as long as it needed to be.
+ */
+import { computed } from 'vue'
+import { Minus, Plus, X } from '@lucide/vue'
+import { Button } from '~/components/ui/button'
+import { PHOTOS } from '~/data/photos'
 import type { CartItem } from '~/types/menu'
+import { formatPeso } from '~/utils'
 
-defineProps<{ item: CartItem }>()
-defineEmits<{
+const props = defineProps<{ item: CartItem }>()
+
+const emit = defineEmits<{
   (e: 'changeQty', id: number, delta: number): void
   (e: 'remove', id: number): void
 }>()
+
+// Resolve through the manifest rather than rebuilding the path by hand —
+// a photo could live in either image group, and the manifest is the record.
+const image = computed(() => (props.item.image ? PHOTOS[props.item.image] : undefined))
 </script>
 
 <template>
-  <div class="relative rounded-xl overflow-hidden cursor-pointer group touch-manipulation"
-    style="background: var(--bg-card)">
-
-    <!-- Image or icon -->
-    <div class="w-full h-28 sm:h-32 lg:h-36 flex items-center justify-center overflow-hidden"
-      style="background: var(--bg-sidebar)">
-      <img
-        v-if="item.image"
-        :src="item.image"
-        :alt="item.name"
-        class="w-full h-full object-cover"
-        loading="lazy"
-      />
-      <span v-else class="text-xl sm:text-2xl">{{ item.icon }}</span>
-    </div>
-
-    <!-- Bottom gradient for qty controls visibility -->
-    <div class="absolute inset-x-0 bottom-0 h-20 pointer-events-none"
-      style="background: linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.5) 55%, transparent 100%)" />
-
-    <!-- X button — top right -->
-    <UButton
-      size="xs"
-      variant="soft"
-      color="error"
-      icon="i-heroicons-x-mark"
-      class="absolute top-1 right-1 z-10 min-w-7 min-h-7"
-      :aria-label="`Remove ${item.name}`"
-      @click="$emit('remove', item.id)"
+  <div class="group flex items-center gap-2.5 rounded-lg border border-border bg-card p-2">
+    <NuxtImg
+      v-if="image"
+      :src="image.src"
+      alt=""
+      :width="image.width"
+      :height="image.height"
+      sizes="xs:48px"
+      class="size-12 shrink-0 rounded-md object-cover"
+      loading="lazy"
+      aria-hidden="true"
     />
-
-    <!-- Name + price + qty — bottom -->
-    <div class="absolute inset-x-0 bottom-0 p-2 z-10">
-      <p class="text-xs font-medium text-white leading-tight truncate">{{ item.name }}</p>
-      <p class="text-[11px] text-white/70 tnum">₱{{ item.price.toFixed(2) }}</p>
-      <div class="flex items-center justify-between mt-1.5 gap-1">
-        <UButton size="xs" variant="ghost" class="min-w-7 min-h-7 text-white" :aria-label="`Decrease ${item.name}`" @click="$emit('changeQty', item.id, -1)">−</UButton>
-        <span class="text-xs font-semibold text-white tnum min-w-6 text-center">{{ item.qty }}</span>
-        <UButton size="xs" variant="ghost" class="min-w-7 min-h-7 text-white" :aria-label="`Increase ${item.name}`" @click="$emit('changeQty', item.id, 1)">+</UButton>
-      </div>
+    <div
+      v-else
+      class="flex size-12 shrink-0 items-center justify-center rounded-md bg-muted text-lg"
+      aria-hidden="true"
+    >
+      {{ props.item.icon }}
     </div>
 
+    <div class="min-w-0 flex-1">
+      <p class="truncate text-card leading-tight">{{ props.item.name }}</p>
+      <p class="tnum mt-0.5 text-meta text-muted-foreground">
+        {{ formatPeso(props.item.price) }} each
+      </p>
+    </div>
+
+    <!-- Quantity stepper -->
+    <div class="flex shrink-0 items-center gap-0.5 rounded-md border border-border">
+      <Button
+        variant="ghost"
+        size="icon-xs"
+        :aria-label="`Decrease ${props.item.name}`"
+        @click="emit('changeQty', props.item.id, -1)"
+      >
+        <Minus class="size-3.5" />
+      </Button>
+      <span
+        class="tnum min-w-6 text-center text-body font-semibold tabular-nums"
+        :aria-label="`Quantity ${props.item.qty}`"
+      >{{ props.item.qty }}</span>
+      <Button
+        variant="ghost"
+        size="icon-xs"
+        :aria-label="`Increase ${props.item.name}`"
+        @click="emit('changeQty', props.item.id, 1)"
+      >
+        <Plus class="size-3.5" />
+      </Button>
+    </div>
+
+    <span class="tnum w-16 shrink-0 text-right font-mono text-body font-semibold">
+      {{ formatPeso(props.item.price * props.item.qty) }}
+    </span>
+
+    <Button
+      variant="ghost"
+      size="icon-xs"
+      :aria-label="`Remove ${props.item.name}`"
+      class="shrink-0 text-muted-foreground hover:text-destructive"
+      @click="emit('remove', props.item.id)"
+    >
+      <X class="size-3.5" />
+    </Button>
   </div>
 </template>

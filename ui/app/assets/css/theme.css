@@ -1,0 +1,197 @@
+/* ============================================================================
+   Design tokens — warm coffeehouse, mapped onto shadcn's token model.
+   Loaded after `tailwindcss` + `shadcn-vue/tailwind.css`; see main.css.
+
+   NOTE ON NAMING
+   shadcn reserves `--accent` for a subtle hover fill. The brand amber that the
+   old stylesheet called `--accent` is now `--primary`. Never reach for
+   `--accent` expecting the brand colour.
+   ========================================================================== */
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  /* Surfaces -------------------------------------------------------------- */
+  --background: #f5f0eb; /* warm cream   */
+  --foreground: #1a1210;
+  --card: #ffffff;
+  --card-foreground: #1a1210;
+  --popover: #ffffff;
+  --popover-foreground: #1a1210;
+
+  /* Brand ---------------------------------------------------------------- */
+  /* #9a6f3e darkened to #88602f: the original lands at 4.47:1 on white,
+     just under the 4.5:1 AA threshold. This keeps the hue, passes AA. */
+  --primary: #88602f;
+  --primary-foreground: #fffdf9;
+  --secondary: #efe7dd;
+  --secondary-foreground: #1a1210;
+
+  /* Neutrals -------------------------------------------------------------- */
+  --muted: #f0e9e1;
+  --muted-foreground: #6b5e54; /* 5.5:1 on --background */
+  --accent: #f0e7da;
+  --accent-foreground: #1a1210;
+
+  /* Feedback ------------------------------------------------------------- */
+  --destructive: #c5302f;
+  --destructive-foreground: #ffffff;
+  --success: #2f7a45;
+  --success-foreground: #ffffff;
+  --warning: #a45a12;
+  --warning-foreground: #fffdf9;
+
+  /* Lines & focus --------------------------------------------------------- */
+  --border: #e2d9d0;
+  --input: #e2d9d0;
+  --ring: #88602f;
+
+  /* Order lifecycle — mirrors ORDER_STATUS_META in constants/order-status.ts */
+  --status-pending: #a45a12;
+  --status-preparing: #8a5a1c;
+  --status-ready: #2f7a45;
+  --status-completed: #6b5e54;
+  --status-cancelled: #c5302f;
+
+  /* Geometry -------------------------------------------------------------- */
+  --radius: 0.625rem;
+
+  /* Elevation — warm, low-contrast, never pure black --------------------- */
+  --shadow-card: 0 1px 2px rgb(26 18 16 / 0.06), 0 4px 16px rgb(26 18 16 / 0.06);
+  --shadow-lift: 0 4px 12px rgb(26 18 16 / 0.10), 0 12px 32px rgb(26 18 16 / 0.10);
+  --shadow-pop: 0 8px 24px rgb(26 18 16 / 0.12), 0 24px 56px rgb(26 18 16 / 0.12);
+}
+
+.dark {
+  /* Surfaces -------------------------------------------------------------- */
+  --background: #0f0d0b; /* espresso    */
+  --foreground: #e8ddd0;
+  --card: #1a1612;
+  --card-foreground: #e8ddd0;
+  --popover: #1a1612;
+  --popover-foreground: #e8ddd0;
+
+  /* Brand ---------------------------------------------------------------- */
+  --primary: #c9a96e;
+  --primary-foreground: #1a1210;
+  --secondary: #211b15;
+  --secondary-foreground: #e8ddd0;
+
+  /* Neutrals -------------------------------------------------------------- */
+  --muted: #211b15;
+  --muted-foreground: #a89880; /* 6.9:1 on --background */
+  --accent: #2a231c;
+  --accent-foreground: #e8ddd0;
+
+  /* Feedback ------------------------------------------------------------- */
+  --destructive: #e5484d;
+  --destructive-foreground: #1a1210;
+  --success: #7bbd8b;
+  --success-foreground: #0f1a13;
+  --warning: #e0a458;
+  --warning-foreground: #1f1509;
+
+  /* Lines & focus --------------------------------------------------------- */
+  --border: #2e2820;
+  --input: #2e2820;
+  --ring: #c9a96e;
+
+  /* Order lifecycle ------------------------------------------------------- */
+  --status-pending: #e0a458;
+  --status-preparing: #d08a4a;
+  --status-ready: #7bbd8b;
+  --status-completed: #a89880;
+  --status-cancelled: #e5484d;
+
+  /* Elevation ------------------------------------------------------------- */
+  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.40), 0 4px 16px rgb(0 0 0 / 0.25);
+  --shadow-lift: 0 4px 12px rgb(0 0 0 / 0.45), 0 12px 32px rgb(0 0 0 / 0.30);
+  --shadow-pop: 0 8px 24px rgb(0 0 0 / 0.50), 0 24px 56px rgb(0 0 0 / 0.40);
+}
+
+@theme inline {
+  /* Colour ---------------------------------------------------------------- */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-status-pending: var(--status-pending);
+  --color-status-preparing: var(--status-preparing);
+  --color-status-ready: var(--status-ready);
+  --color-status-completed: var(--status-completed);
+  --color-status-cancelled: var(--status-cancelled);
+
+  /* Typography ------------------------------------------------------------
+     Geist Sans for UI, Geist Mono for anything numeric. Enforced as named
+     steps so hierarchy can't drift — see README "Design system".
+     ---------------------------------------------------------------------- */
+  --font-sans: "Geist Variable", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "Geist Mono Variable", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --text-display: 1.5rem; /* 24px  page title @ sm+   */
+  --text-display--line-height: 2rem;
+  --text-display--letter-spacing: -0.02em;
+  --text-display--font-weight: 600;
+
+  --text-title: 1.25rem; /* 20px  page title @ base  */
+  --text-title--line-height: 1.75rem;
+  --text-title--letter-spacing: -0.02em;
+  --text-title--font-weight: 600;
+
+  --text-section: 0.9375rem; /* 15px section heading  */
+  --text-section--line-height: 1.375rem;
+  --text-section--letter-spacing: -0.01em;
+  --text-section--font-weight: 600;
+
+  --text-card: 0.875rem; /* 14px  card / item name  */
+  --text-card--line-height: 1.25rem;
+  --text-card--font-weight: 500;
+
+  --text-body: 0.8125rem; /* 13px  body copy         */
+  --text-body--line-height: 1.125rem;
+
+  --text-meta: 0.75rem; /* 12px  meta / caption     */
+  --text-meta--line-height: 1rem;
+
+  --text-label: 0.6875rem; /* 11px  uppercase eyebrow */
+  --text-label--line-height: 0.875rem;
+  --text-label--letter-spacing: 0.06em;
+  --text-label--font-weight: 500;
+
+  /* Radius ---------------------------------------------------------------- */
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  /* Elevation ------------------------------------------------------------- */
+  --shadow-card: var(--shadow-card);
+  --shadow-lift: var(--shadow-lift);
+  --shadow-pop: var(--shadow-pop);
+}
+
+/* Numeric treatment — every currency figure in the app gets this. */
+@utility tnum {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}

@@ -1,0 +1,102 @@
+/* ============================================================================
+   Motion tokens & keyframes.
+   Single source of truth for timing/easing — motion-v components read the
+   same values, so CSS and JS animations stay in lockstep.
+   ========================================================================== */
+
+:root {
+  /* Easing ------------------------------------------------------------- */
+  --ease-warm: cubic-bezier(0.22, 1, 0.36, 1); /* default UI ease      */
+  --ease-out: cubic-bezier(0.25, 1, 0.5, 1); /* exits, large surfaces */
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1); /* overshoot, taps  */
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1); /* two-way            */
+
+  /* Duration ------------------------------------------------------------ */
+  --dur-instant: 100ms;
+  --dur-fast: 150ms;
+  --dur-med: 280ms;
+  --dur-slow: 480ms;
+  --dur-slower: 700ms;
+}
+
+/* --- Entrances ----------------------------------------------------------- */
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes blur-in {
+  from { opacity: 0; filter: blur(10px); }
+  to   { opacity: 1; filter: blur(0); }
+}
+
+@keyframes pop {
+  0%   { transform: scale(0.6); }
+  60%  { transform: scale(1.08); }
+  100% { transform: scale(1); }
+}
+
+/* `card-in`, `card-pulse`, `btn-pop` and `icon-float` used to live here. They
+   were the add-to-cart feedback on MenuCard and have been replaced by a single
+   motion-v spring — see components/menu/MenuCard.vue. */
+
+/* --- Ambient ------------------------------------------------------------- */
+
+/* Slow sheen for the hero / CTA panels. Very low contrast on purpose. */
+@keyframes sheen {
+  0%   { transform: translateX(-120%) rotate(12deg); }
+  60%  { transform: translateX(120%) rotate(12deg); }
+  100% { transform: translateX(120%) rotate(12deg); }
+}
+
+/* --- Utilities ----------------------------------------------------------- */
+/* `whileInView`-style scroll reveals that don't need JS. Honour the
+   `--stagger` custom property so a list can cascade. */
+
+@utility anim-fade-up {
+  animation: fade-up var(--dur-med) var(--ease-warm) both;
+  animation-delay: var(--stagger, 0ms);
+}
+
+@utility anim-fade-in {
+  animation: fade-in var(--dur-med) var(--ease-out) both;
+  animation-delay: var(--stagger, 0ms);
+}
+
+@utility anim-blur-in {
+  animation: blur-in var(--dur-slow) var(--ease-warm) both;
+  animation-delay: var(--stagger, 0ms);
+}
+
+@utility anim-pop {
+  animation: pop var(--dur-med) var(--ease-spring) both;
+}
+
+@utility anim-press {
+  transition: transform var(--dur-instant) var(--ease-warm);
+
+  &:active {
+    transform: scale(0.97);
+  }
+}
+
+/* --- Reduced motion ------------------------------------------------------ */
+/* A global guard. Individual animations opt back in only if they carry real
+   meaning (e.g. a spinner); everything decorative stops. */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
