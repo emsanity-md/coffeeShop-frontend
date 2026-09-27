@@ -1,21 +1,29 @@
 <script setup lang="ts">
 /**
- * Feature grid. Asymmetric bento rather than a uniform 3x2 — the wide first
- * tile earns its space, the rest stay compact.
+ * Feature grid — a bento, not a uniform card wall.
+ *
+ * On lg the grid is four columns of ~15rem. The two photo features claim a 2x2
+ * block each and put the copy *over* the photo, so the extra area does work
+ * instead of just padding out a taller card. The remaining four are 1x1 tiles
+ * with a plain icon chip, which is what gives the section its hierarchy.
+ *
+ * Heroes lead the array deliberately: grid auto-placement puts the first 2x2
+ * block in the left column and flows the 1x1 tiles into the two free columns,
+ * which tiles the whole 4x2 area with no holes and no explicit row/col starts.
  */
 import {
   CloudOff, Moon, Printer, Receipt, Search, Users,
 } from '@lucide/vue'
 import { Card } from '~/components/ui/card'
-import { PHOTOS } from '~/data/photos'
+import { photo } from '~/data/photos'
 import type { Component } from 'vue'
 
 interface Feature {
   icon: Component
   title: string
   body: string
-  /** `wide` spans two columns on lg. */
-  span?: boolean
+  /** `hero` takes a 2x2 block on lg and a full row on sm. */
+  hero?: boolean
   photo?: string
 }
 
@@ -24,8 +32,15 @@ const features: Feature[] = [
     icon: Search,
     title: 'Browse & search',
     body: 'Filter by category or search across every name and description. Results regroup themselves as you narrow down.',
-    span: true,
+    hero: true,
     photo: 'ambience-pourover',
+  },
+  {
+    icon: Printer,
+    title: 'Order lifecycle',
+    body: 'Pending, preparing, ready, completed or cancelled — with revenue that excludes the voided ones.',
+    hero: true,
+    photo: 'ambience-barista',
   },
   {
     icon: Users,
@@ -38,13 +53,6 @@ const features: Feature[] = [
     body: 'Per-customer receipts, formatted for a thermal printer.',
   },
   {
-    icon: Printer,
-    title: 'Order lifecycle',
-    body: 'Pending, preparing, ready, completed or cancelled — with revenue that excludes the voided ones.',
-    span: true,
-    photo: 'ambience-barista',
-  },
-  {
     icon: CloudOff,
     title: 'Works offline',
     body: 'Cart and orders live in localStorage. No network round-trip, no spinner while you take the next order.',
@@ -55,6 +63,14 @@ const features: Feature[] = [
     body: 'A warm espresso dark and a cream light mode, both checked for contrast.',
   },
 ]
+
+/**
+ * Photos resolved here rather than in the template: `photo()` takes a
+ * possibly-undefined key, so `PHOTOS[f.photo]` in markup would not narrow.
+ * `pic` is set on the hero tiles only; a hero with a bad key degrades to the
+ * compact tile rather than rendering a broken image.
+ */
+const tiles = features.map(f => ({ ...f, pic: photo(f.photo) }))
 </script>
 
 <template>
@@ -68,40 +84,52 @@ const features: Feature[] = [
         </p>
       </RevealOnScroll>
 
-      <StaggerList class="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <StaggerList
+        class="mt-10 grid gap-4 sm:grid-cols-2 sm:gap-5 lg:auto-rows-[minmax(13rem,auto)] lg:grid-cols-4"
+      >
         <StaggerItem
-          v-for="f in features"
+          v-for="f in tiles"
           :key="f.title"
-          :class="f.span ? 'lg:col-span-2' : ''"
+          :class="f.hero ? 'sm:col-span-2 lg:row-span-2' : ''"
         >
-          <Card class="lift-card lift-card-hover group h-full overflow-hidden">
-            <div class="flex h-full flex-col">
-              <div
-                v-if="f.photo && PHOTOS[f.photo]"
-                class="relative aspect-[16/9] overflow-hidden"
-              >
-                <NuxtImg
-                  :src="PHOTOS[f.photo]!.src"
-                  :alt="PHOTOS[f.photo]!.alt"
-                  :width="PHOTOS[f.photo]!.width"
-                  :height="PHOTOS[f.photo]!.height"
-                  sizes="xs:100vw sm:50vw lg:640px"
-                  class="size-full object-cover transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.04]"
-                  loading="lazy"
-                />
-                <div
-                  class="pointer-events-none absolute inset-0"
-                  style="background: linear-gradient(to top, color-mix(in srgb, var(--card) 92%, transparent), transparent 60%)"
-                />
-              </div>
+          <!-- Hero tile: photo is the background, copy sits on a scrim. -->
+          <Card v-if="f.hero && f.pic" class="lift-card lift-card-hover group relative h-full overflow-hidden p-0">
+            <NuxtImg
+              :src="f.pic!.src"
+              :alt="f.pic!.alt"
+              :width="f.pic!.width"
+              :height="f.pic!.height"
+              sizes="xs:100vw sm:100vw lg:640px"
+              class="absolute inset-0 size-full object-cover transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.04]"
+              loading="lazy"
+            />
+            <!-- Scrim uses --card rather than black/white, so the same ramp
+                 stays legible in both themes. Opaque at the baseline where the
+                 copy sits, clearing to let the photo read at the top. -->
+            <div
+              aria-hidden="true"
+              class="pointer-events-none absolute inset-0"
+              style="background: linear-gradient(to top, color-mix(in srgb, var(--card) 97%, transparent) 6%, color-mix(in srgb, var(--card) 82%, transparent) 42%, color-mix(in srgb, var(--card) 30%, transparent) 100%)"
+            />
+            <div class="relative flex h-full flex-col justify-end p-6">
+              <span class="flex size-11 items-center justify-center rounded-xl bg-primary/15 text-primary backdrop-blur-sm">
+                <component :is="f.icon" class="size-5" />
+              </span>
+              <h3 class="mt-4 text-title">{{ f.title }}</h3>
+              <p class="mt-2 max-w-md text-body text-pretty text-muted-foreground">
+                {{ f.body }}
+              </p>
+            </div>
+          </Card>
 
-              <div class="flex flex-1 flex-col p-5 pt-4">
-                <span class="flex size-9 items-center justify-center rounded-lg bg-primary/12 text-primary">
-                  <component :is="f.icon" class="size-4.5" />
-                </span>
-                <h3 class="mt-3.5 text-section">{{ f.title }}</h3>
-                <p class="mt-1.5 text-body text-pretty text-muted-foreground">{{ f.body }}</p>
-              </div>
+          <!-- Compact tile: icon chip, title, two lines of copy. -->
+          <Card v-else class="lift-card lift-card-hover group h-full overflow-hidden p-0">
+            <div class="flex h-full flex-col p-6">
+              <span class="flex size-10 items-center justify-center rounded-xl bg-primary/12 text-primary transition-colors group-hover:bg-primary/20">
+                <component :is="f.icon" class="size-5" />
+              </span>
+              <h3 class="mt-4 text-section">{{ f.title }}</h3>
+              <p class="mt-2 text-body text-pretty text-muted-foreground">{{ f.body }}</p>
             </div>
           </Card>
         </StaggerItem>

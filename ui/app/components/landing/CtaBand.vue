@@ -1,6 +1,6 @@
 <script setup lang="ts">
 /** Closing call to action. */
-import { ArrowRight, Coffee } from '@lucide/vue'
+import { ArrowRight } from '@lucide/vue'
 import { Button } from '~/components/ui/button'
 import { ROUTES } from '~/constants/site'
 </script>
@@ -17,7 +17,7 @@ import { ROUTES } from '~/constants/site'
           />
           <div class="relative">
             <span class="mx-auto flex size-11 items-center justify-center rounded-full bg-primary/12 text-primary">
-              <Coffee class="size-5" />
+              <BrandMark class="size-5" />
             </span>
             <h2 class="mx-auto mt-5 max-w-2xl text-display text-balance">
               Ready to pour?
