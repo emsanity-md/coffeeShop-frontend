@@ -1,150 +1,119 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+/**
+ * Cart panel. Rendered as the desktop right-hand column and inside the mobile
+ * sheet, so it takes its height from its container rather than the viewport.
+ */
+import { ShoppingBag, Trash2, X } from '@lucide/vue'
+import { Badge } from '~/components/ui/badge'
+import { Button } from '~/components/ui/button'
+import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '~/components/ui/empty'
+import { Tooltip, TooltipContent, TooltipTrigger } from '~/components/ui/tooltip'
 import type { CartItem, Customer } from '~/types/menu'
-import { useOrders } from '~/composables/useOrders'
-import type { CustomerReceipt, OrderStatus } from '~/composables/useOrders'
+import type { CustomerReceipt } from '~/types/order'
+import { formatPeso } from '~/utils'
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
   cartItems: CartItem[]
   cartCount: number
   total: number
   customers: Customer[]
-}>()
+  receipts?: CustomerReceipt[]
+  canPlaceOrder?: boolean
+  /** Set when rendered inside the mobile sheet, to show the close button. */
+  inSheet?: boolean
+}>(), { receipts: () => [], canPlaceOrder: false, inSheet: false })
 
 const emit = defineEmits<{
   (e: 'changeQty', id: number, delta: number): void
   (e: 'remove', id: number): void
   (e: 'clearCart'): void
-  (e: 'close-drawer'): void
+  (e: 'placeOrder'): void
+  (e: 'viewReceipt', receipt: CustomerReceipt): void
+  (e: 'closeSheet'): void
 }>()
-
-const showReceipt = ref(false)
-const selectedCustomerReceipt = ref<CustomerReceipt | null>(null)
-const selectedReceiptOrderTotal = ref(0)
-const selectedReceiptIsSplit = ref(false)
-const selectedReceiptDate = ref<string | undefined>(undefined)
-const selectedReceiptOrderId = ref<string | undefined>(undefined)
-const selectedReceiptStatus = ref<OrderStatus | undefined>(undefined)
-const { addOrder } = useOrders()
-
-function splitTotalEqually(total: number, count: number): number[] {
-  if (count <= 1) return [Math.round(total * 100) / 100]
-  const totalCents = Math.round(total * 100)
-  const base = Math.floor(totalCents / count)
-  const remainder = totalCents - base * count
-  return Array.from({ length: count }, (_, i) => (base + (i < remainder ? 1 : 0)) / 100)
-}
-
-const customerReceipts = computed((): CustomerReceipt[] => {
-  if (!props.customers.length) return []
-  const shares = splitTotalEqually(props.total, props.customers.length)
-
-  return props.customers.map((c, index) => ({
-    id: c.id,
-    name: c.name,
-    items: props.cartItems.map(i => ({ ...i })),
-    total: shares[index] ?? 0,
-  }))
-})
-
-function handlePlaceOrder() {
-  if (!props.cartItems.length || !props.customers.length) return
-  const receipts = customerReceipts.value
-  if (!receipts.length) return
-  const isSplit = props.customers.length > 1
-  const order = addOrder(receipts, props.total, isSplit)
-  emit('clearCart')
-  const firstReceipt = receipts[0]
-  if (firstReceipt) {
-    selectedCustomerReceipt.value = firstReceipt
-    selectedReceiptOrderTotal.value = order.total
-    selectedReceiptIsSplit.value = order.splitEqually
-    selectedReceiptDate.value = order.date
-    selectedReceiptOrderId.value = order.id
-    selectedReceiptStatus.value = order.status
-    showReceipt.value = true
-  }
-}
-
-function viewCustomerReceipt(receipt: CustomerReceipt) {
-  selectedCustomerReceipt.value = receipt
-  selectedReceiptOrderTotal.value = props.total
-  selectedReceiptIsSplit.value = props.customers.length > 1
-  selectedReceiptDate.value = new Date().toISOString()
-  selectedReceiptOrderId.value = undefined
-  selectedReceiptStatus.value = undefined
-  showReceipt.value = true
-}
 </script>
 
 <template>
-  <aside class="w-full lg:w-72 xl:w-80 shrink-0 flex flex-col border-l lg:border-l overflow-hidden"
-    style="background: var(--bg-cart); border-color: var(--border-color)">
+  <aside
+    class="flex h-full w-full flex-col border-border bg-card lg:w-[23rem] lg:border-l xl:w-[24rem]"
+    aria-label="Current order"
+  >
+    <header class="flex shrink-0 items-center gap-2 border-b border-border p-3.5">
+      <ShoppingBag class="size-4 shrink-0 text-primary" />
+      <h2 class="min-w-0 flex-1 truncate text-section">Your order</h2>
 
-    <div class="p-3 sm:p-4 border-b flex items-center gap-2 shrink-0"
-      style="border-color: var(--border-color)">
-      <span class="font-medium text-sm flex-1 min-w-0" style="color: var(--text-primary)">Your order</span>
-      <UBadge v-if="cartCount > 0" :key="cartCount" color="primary" size="sm" class="anim-pop tnum shrink-0">{{ cartCount }}</UBadge>
-      <UButton
-        v-if="$attrs['data-drawer'] !== undefined"
+      <Badge v-if="props.cartCount > 0" variant="secondary" class="tnum shrink-0">
+        {{ props.cartCount }}
+      </Badge>
+
+      <Tooltip v-if="props.cartItems.length">
+        <TooltipTrigger as-child>
+          <Button
+            variant="ghost"
+            size="icon-xs"
+            aria-label="Clear the whole order"
+            class="shrink-0 text-muted-foreground hover:text-destructive"
+            @click="emit('clearCart')"
+          >
+            <Trash2 class="size-3.5" />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>Clear order</TooltipContent>
+      </Tooltip>
+
+      <Button
+        v-if="props.inSheet"
         variant="ghost"
-        color="neutral"
-        icon="i-heroicons-x-mark"
-        size="xs"
+        size="icon-xs"
         aria-label="Close cart"
-        class="lg:hidden shrink-0 -mr-1"
-        @click="$emit('close-drawer')"
-      />
-    </div>
+        class="-mr-1 shrink-0 lg:hidden"
+        @click="emit('closeSheet')"
+      >
+        <X class="size-4" />
+      </Button>
+    </header>
 
-    <div class="flex-1 overflow-y-auto overscroll-contain p-3 sm:p-3">
-      <div v-if="!cartItems.length" class="anim-fade-up text-center py-8 sm:py-10 text-xs px-4"
-        style="color: var(--text-faint)">
-        Your cart is empty
-      </div>
+    <div class="min-h-0 flex-1 overflow-y-auto overscroll-contain p-3">
+      <Empty v-if="!props.cartItems.length" class="border-0 py-10">
+        <EmptyHeader>
+          <EmptyMedia class="bg-muted text-muted-foreground">
+            <ShoppingBag class="size-5" />
+          </EmptyMedia>
+          <EmptyTitle class="text-card">No items yet</EmptyTitle>
+          <EmptyDescription class="text-meta">
+            Tap a menu card to start the order.
+          </EmptyDescription>
+        </EmptyHeader>
+      </Empty>
 
-      <TransitionGroup name="cart-item" tag="div" class="relative grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-2">
-        <CartItem
-          v-for="item in cartItems"
-          :key="item.id"
-          :item="item"
-          @change-qty="(id, delta) => $emit('changeQty', id, delta)"
-          @remove="$emit('remove', $event)"
-        />
+      <TransitionGroup v-else name="list" tag="ul" class="relative flex flex-col gap-2">
+        <li v-for="item in props.cartItems" :key="item.id">
+          <CartItem
+            :item="item"
+            @change-qty="(id, delta) => emit('changeQty', id, delta)"
+            @remove="emit('remove', $event)"
+          />
+        </li>
       </TransitionGroup>
-
-      <div v-if="customers.length" class="mt-4 space-y-2 border-t pt-3" style="border-color: var(--border-color)">
-        <div v-for="receipt in customerReceipts" :key="receipt.id" class="flex justify-between text-xs" style="color: var(--text-primary)">
-          <span class="font-medium">{{ receipt.name }}</span>
-          <span>₱{{ receipt.total.toFixed(2) }}</span>
-        </div>
-        <div class="flex justify-between text-xs font-medium pt-1 border-t" style="border-color: var(--border-color); color: var(--text-primary)">
-          <span>Total</span>
-          <span>₱{{ total.toFixed(2) }}</span>
-        </div>
-      </div>
     </div>
 
     <CartFooter
-      v-if="cartItems.length"
-      :items="cartItems"
-      :total="total"
-      @place-order="handlePlaceOrder"
+      v-if="props.cartItems.length"
+      :items="props.cartItems"
+      :total="props.total"
+      :customers="props.customers"
+      :receipts="props.receipts"
+      :can-place-order="props.canPlaceOrder"
+      @place-order="emit('placeOrder')"
+      @view-receipt="emit('viewReceipt', $event)"
     />
 
-    <ReceiptModal
-      v-if="selectedCustomerReceipt"
-      :open="showReceipt"
-      :customer-name="selectedCustomerReceipt.name"
-      :items="selectedCustomerReceipt.items"
-      :total="selectedCustomerReceipt.total"
-      :is-split="selectedReceiptIsSplit"
-      :split-total="selectedReceiptOrderTotal"
-      :date="selectedReceiptDate"
-      :order-id="selectedReceiptOrderId"
-      :status="selectedReceiptStatus"
-      @close="showReceipt = false"
-    />
-
+    <p
+      v-else-if="props.cartItems.length === 0 && props.customers.length"
+      class="shrink-0 border-t border-border p-3.5 text-meta text-muted-foreground"
+    >
+      {{ props.customers.length }} customer{{ props.customers.length === 1 ? '' : 's' }} added,
+      waiting on items.
+    </p>
   </aside>
 </template>

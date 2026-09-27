@@ -1,34 +1,41 @@
-# CoffeeShop Frontend — Prototype
+# Brewed Coffee House
 
 > [!WARNING]
-> **Prototype Status:** This project is currently a **prototype / proof-of-concept**. It is **NOT production-ready** out of the box. Data is stored in `localStorage`, there is no backend, no authentication, no tests, and no CI/CD. See [Production Readiness](#-production-readiness-roadmap) for what is required before production use.
+> **Prototype Status:** This project is a **prototype / proof-of-concept**. It is **NOT production-ready** out of the box. Data is stored in `localStorage`, there is no backend, no authentication, no tests, and no CI/CD. See [Production Readiness](#-production-readiness-roadmap) for what is required before production use.
 >
-> Do **not** deploy this prototype with real customer/payment data.
+> Do **not** deploy this prototype with real customer or payment data.
 
 [![Nuxt 4](https://img.shields.io/badge/Nuxt-4.5-00DC82?logo=nuxt)](https://nuxt.com)
-[![Vue 3](https://img.shields.io/badge/Vue-3.5-4FC08D?logo=vue.js)](https://vuejs.org)
-[![Nuxt UI](https://img.shields.io/badge/Nuxt%20UI-4.11-black)](https://ui.nuxt.com)
+[![Vue 3](https://img.shields.io/badge/Vue-3.5-4FC08D?logo=vuedotjs)](https://vuejs.org)
+[![shadcn-vue](https://img.shields.io/badge/shadcn--vue-2.8-111827)](https://www.shadcn-vue.com)
 [![Tailwind CSS 4](https://img.shields.io/badge/Tailwind-4.3-38BDF8?logo=tailwindcss)](https://tailwindcss.com)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript)](https://www.typescriptlang.org)
+[![motion-v](https://img.shields.io/badge/motion--v-2.4-0055FF)](https://motion.dev)
+[![Geist](https://img.shields.io/badge/Geist-000000)](https://vercel.com/font)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript)](https://www.typescriptlang.org)
 [![Status](https://img.shields.io/badge/status-prototype-orange)](#-prototype-disclaimer)
 [![License](https://img.shields.io/badge/license-MIT-blue)](#-license)
 
-A responsive Point-of-Sale (POS) / ordering UI for a coffee shop. Browse menu, search/filter, manage a cart, split orders across multiple customers, and track order lifecycle.
+A responsive Point-of-Sale (POS) / ordering UI for a coffee shop, with a marketing
+landing page. Browse the menu, search and filter, manage a cart, split orders
+across multiple customers, and track the order lifecycle.
 
-Built with **Nuxt 4 + Vue 3 + Nuxt UI + Tailwind CSS 4**.
+Built with **Nuxt 4 + Vue 3 + shadcn-vue + motion-v + Tailwind CSS 4 + Geist**.
 
 ---
 
 ## Table of Contents
 
 - [Prototype Disclaimer](#-prototype-disclaimer)
+- [Routes](#-routes)
 - [Demo & Features](#-features-current-prototype)
 - [Tech Stack](#-tech-stack)
+- [Design System](#-design-system)
+- [Images & Credits](#-images--credits)
 - [Project Structure](#-project-structure)
 - [Getting Started](#-getting-started)
 - [Available Scripts](#-available-scripts)
 - [Environment Variables](#-environment-variables)
-- [Architecture Notes (Prototype)](#-architecture-notes-prototype)
+- [Architecture Notes](#-architecture-notes-prototype)
 - [Production Readiness Roadmap](#-production-readiness-roadmap)
 - [Deployment](#-deployment)
 - [Quality, Security & Operations](#-quality-security--operations)
@@ -44,7 +51,7 @@ This repository is a **frontend-only prototype** intended for UI/UX validation a
 
 | Aspect | Prototype Reality | Production Requirement |
 |---|---|---|
-| **Persistence** | `localStorage` (`coffee_shop_cart`, `coffee_shop_orders`) — per-browser, volatile | Backend API + database (Postgres/MySQL) |
+| **Persistence** | `localStorage` (`coffee_shop_cart`, `coffee_shop_orders`, `coffee_shop_disclaimer_dismissed`) | Backend API + database (Postgres/MySQL) |
 | **Auth** | None | Auth (Nuxt Auth / Auth.js, JWT, RBAC for staff/admin) |
 | **Payments** | No payment flow, mock totals in PHP (₱) | Payment gateway (Stripe/PayMongo/GCash) + server-side price verification |
 | **Data Source** | Static JSON (`app/data/menu.json`, `categories.json`) | CMS / Admin API |
@@ -57,14 +64,46 @@ This repository is a **frontend-only prototype** intended for UI/UX validation a
 
 ---
 
-## ✨ Features (Current Prototype)
+## 🧭 Routes
 
-- **Menu browsing** — category sidebar + responsive drawer, grouped grid, search by name/description
-- **Cart** — add, change qty, remove, clear; desktop panel + mobile drawer; persisted to `localStorage`
-- **Multi-customer** — add/edit/remove customers, assign/split, per-customer receipts
-- **Orders page** (`/orders`) — history, revenue total, status filters (`pending` → `preparing` → `ready` → `completed` / `cancelled`), status transitions, delete / clear-all with confirmation, receipt modal
-- **Responsive** — desktop sidebar + mobile `UDrawer` patterns; `100dvh` layout
-- **Theming** — custom CSS variables (`--bg-app`, `--text-*`, `--border-color`) + dark/light via `ThemeToggle`
+| Route | Page | Layout | Purpose |
+|---|---|---|---|
+| `/` | `pages/index.vue` | `landing` | Marketing landing page: hero, features, live menu preview, lifecycle explainer |
+| `/pos` | `pages/pos.vue` | `pos` | The point of sale. Three-pane, viewport-locked |
+| `/orders` | `pages/orders.vue` | `pos` | Order history, status filters, revenue KPIs |
+
+Layouts are chosen per page with `definePageMeta({ layout: '...' })`. There is deliberately
+no `default.vue` — an unset layout renders bare, which is a bug we hit and don't want back.
+
+---
+
+## ✨ Features
+
+**Landing (`/`)**
+- Hero with photo cluster, a floating order-card preview, and checkable product facts
+- Bento feature grid, **rendered from the same `menu.json` the POS uses** so it can't go stale
+- Order-lifecycle explainer driven by the real status machine
+- Image credits with referral links
+
+**Point of sale (`/pos`)**
+- Category rail (desktop) / `PillNav` + sheet (mobile), plus search across name and description
+- Grouped grid that collapses to one list when a category or search is active
+- Cart: add, change quantity, remove, clear; persisted to `localStorage`
+- Multi-customer: add / edit / remove, duplicate-name guard, **cent-accurate equal split**
+- Per-customer receipts, thermal-printer print path
+- Prototype privacy notice on first entry, dismissible permanently
+
+**Orders (`/orders`)**
+- Revenue / count / in-progress KPIs with count-up animation
+- Status filter pills, per-status counts
+- Status transitions: `pending → preparing → ready → completed`, plus cancel and reopen
+- Per-customer receipt viewer, delete and clear-all with confirmation
+
+**Cross-cutting**
+- Dark & light themes, both contrast-checked, no flash on load
+- Responsive from 320px up; `100dvh` tool layout so the cart can't be scrolled away
+- Full keyboard support; `prefers-reduced-motion` respected globally
+- Self-hosted, optimized imagery
 
 ---
 
@@ -72,58 +111,242 @@ This repository is a **frontend-only prototype** intended for UI/UX validation a
 
 | Layer | Choice |
 |---|---|
-| Framework | [Nuxt 4.5.2](https://nuxt.com) (file-based routing, auto-imports, `useState`) |
-| UI | [Vue 3.5](https://vuejs.org), [Nuxt UI 4.11](https://ui.nuxt.com), [Tailwind CSS 4.3](https://tailwindcss.com) |
-| Language | TypeScript (strict via Nuxt tsconfigs) |
-| State | `useState` + `localStorage` sync (`useCart`, `useOrders` composables) |
-| Icons | Nuxt UI / Heroicons (`i-heroicons-*`) |
-| Build | Vite (via Nuxt), Nitro |
+| Framework | [Nuxt 4.5](https://nuxt.com) — file-based routing, auto-imports, `useState` |
+| UI runtime | [Vue 3.5](https://vuejs.org), SSR via Nitro |
+| Components | [shadcn-vue 2.8](https://www.shadcn-vue.com) on [reka-ui 2.10](https://reka-ui.com) (Radix's official Vue successor) |
+| Animation | [motion-v 2.4](https://motion.dev) — Framer Motion's Vue port |
+| Styling | [Tailwind CSS 4.3](https://tailwindcss.com) via `@tailwindcss/vite` |
+| Typography | [Geist](https://vercel.com/font) + Geist Mono, self-hosted via `@fontsource-variable` |
+| Icons | [Lucide](https://lucide.dev) (`@lucide/vue`); shadcn internals use `@radix-icons/vue` |
+| Images | [`@nuxt/image`](https://image.nuxt.com) (ipx → AVIF/WebP) over committed WebP masters |
+| Language | TypeScript 5.9 (strict via Nuxt tsconfigs) |
+| State | `useState` + `localStorage` sync (`useCart`, `useOrders`, `useCustomers`) |
+| Toasts | `vue-sonner` |
+| Build | Vite, Nitro |
 
-> Node: Nuxt 4 requires **Node 20+** (22 LTS recommended).
+> **A note on the library choice.** The original brief asked for **shadcn/ui** and **React Bits**.
+> Both are React-only, and this app is Vue. They were replaced with their official Vue
+> equivalents — **shadcn-vue** (same component API, same `components.json`, same theming model)
+> and **motion-v** (the Framer Motion port), with the React Bits effects reimplemented as Vue
+> components in `app/components/motion/`. Visual output and ergonomics are equivalent; the
+> packages are not literally the React ones.
+
+> Node: Nuxt 4 requires **Node 22.19+** (see `engines` in `package.json`).
+
+---
+
+## 🎨 Design System
+
+### Colour
+
+A warm coffeehouse identity mapped onto shadcn's token model so the primitives work unmodified.
+Light = warm cream, dark = espresso, accent = amber.
+
+| Token | Dark | Light | Role |
+|---|---|---|---|
+| `--background` | `#0f0d0b` | `#f5f0eb` | Page |
+| `--card` | `#1a1612` | `#ffffff` | Cards, panels, header |
+| `--card-foreground` | `#e8ddd0` | `#1a1210` | Card text |
+| `--muted-foreground` | `#a89880` | `#6b5e54` | Secondary text (5.5–6.9:1) |
+| `--primary` | `#c9a96e` | `#88602f` | **Brand accent** |
+| `--muted` | `#211b15` | `#f0e9e1` | Subtle fills |
+| `--border` | `#2e2820` | `#e2d9d0` | Lines |
+| `--destructive` | `#e5484d` | `#c5302f` | Destructive / cancelled |
+| `--radius` | `0.625rem` | `0.625rem` | Corner radius |
+
+Order lifecycle has its own ramp: `--status-pending`, `--status-preparing`, `--status-ready`,
+`--status-completed`, `--status-cancelled`, consumed by `constants/order-status.ts`.
+
+> **Naming trap:** shadcn reserves `--accent` for a subtle *hover fill*. The amber the old
+> stylesheet called `--accent` is now `--primary`. Never reach for `--accent` expecting the brand colour.
+
+**Two accessibility fixes went in during the redesign:**
+1. The old `--text-faint` (`#5a4e44` on `#0f0d0b`) sat at **~2.4:1** and was used on a lot of
+   11px text. It's folded into `--muted-foreground` (5.5–6.9:1) and no longer exists.
+2. Light-mode `--primary` was darkened from `#9a6f3a` to `#88602f`. The original landed at
+   **4.47:1** on white — just under the 4.5:1 AA threshold. The hue is unchanged.
+
+### Typography
+
+Geist Sans for UI, **Geist Mono for every currency figure, quantity and order ID**. Three weights
+maximum (400/500/600), no letter-spacing on body copy, `tabular-nums` on all numerics.
+
+| Role | Class | Size / line | Weight | Family |
+|---|---|---|---|---|
+| Brand wordmark | `text-card` / `text-title` | 14/20 · 20/28 | 600 | Sans, −0.01em |
+| Page title | `text-title` → `text-display` | 20/28 → 24/32 | 600 | Sans, −0.02em |
+| Section heading | `text-section` | 15/22 | 600 | Sans |
+| Card title / item name | `text-card` | 14/20 | 500 | Sans |
+| Body | `text-body` | 13/18 | 400 | Sans |
+| Meta / caption | `text-meta` | 12/16 | 400 | Sans |
+| Micro label | `text-label` | 11/14 | 500 | Sans, `0.06em` uppercase |
+| Price / qty / total | `font-mono` + `tnum` | inherits | 500–600 | **Mono** |
+
+These are declared once in `app/assets/css/theme.css` under `@theme inline`, so the scale can't
+drift between screens.
+
+### Motion
+
+`app/assets/css/motion.css` holds the canonical values; `app/composables/useMotionPreset.ts`
+mirrors them for JS so CSS and motion-v animations stay in lockstep.
+
+| Token | Value | Use |
+|---|---|---|
+| `--ease-warm` | `cubic-bezier(0.22, 1, 0.36, 1)` | Default UI ease |
+| `--ease-spring` | `cubic-bezier(0.34, 1.56, 0.64, 1)` | Taps, pops |
+| `--dur-fast` | `150ms` | Hover, press |
+| `--dur-med` | `280ms` | Entrances, transitions |
+| `--dur-slow` / `--dur-slower` | `480ms` / `700ms` | Page and hero reveals |
+
+`app/components/motion/` re-implements the React Bits patterns that earn their place here:
+
+| Component | Pattern | Used in |
+|---|---|---|
+| `StaggerList` / `StaggerItem` | Animated List | menu grid, order grid, KPIs, landing |
+| `NumberTicker` | Counter | cart count, revenue, KPIs |
+| `LetterPullup` | Letter Pullup | receipt total |
+| `BlurText` | Blur Text | landing hero, page titles |
+| `SpotlightCard` | Spotlight | menu cards |
+| `PillNav` | Pill Nav | category + status filters |
+| `ShimmerBlock` | Shimmer | image skeletons |
+| `ShinyText` | Shiny Text | brand wordmark (marketing only) |
+| `StatusStepper` | Stepper | order lifecycle, POS + landing |
+| `RevealOnScroll` | Scroll reveal | every landing section |
+
+Deliberately **excluded**: particles, glitch, magnetic buttons, marquee, scroll-velocity. A POS
+is used all day and those are distracting. A global `prefers-reduced-motion` guard in
+`motion.css` stops everything decorative, and `useReducedMotion()` handles the JS side.
+
+---
+
+## 🖼 Images & Credits
+
+All menu and landing imagery is **committed to the repository** and served through
+`@nuxt/image` (AVIF/WebP, responsive `sizes`). Nothing is hotlinked, so the POS renders
+identically offline and never waits on a third-party CDN.
+
+**18 images, ~1.2 MB total** — replacing the previous 4 MB of unoptimised PNG for just 5 photos.
+The old set also had a `flat white.png` (whitespace) and `Capuccino.png` (case) that would break
+on a case-sensitive host; all filenames are now kebab-case.
+
+### Sourcing ladder
+
+Each image walks down these tiers independently — one failure doesn't block the batch.
+
+| Tier | Source | Licence | Key |
+|---|---|---|---|
+| 1 | Unsplash | Unsplash License (attribution required via API) | — |
+| 2 | Pexels / Pixabay | Commercial OK, no attribution | — |
+| 3 | Openverse / Wikimedia / StockCake | CC0 / PD / CC-BY | — |
+| 4 | **Generated SVG tile** | ours | Always works, no network |
+
+> Unsplash and Pexels block unauthenticated programmatic access, so automated harvesting from
+> them isn't possible here. The current set was reached at **tier 3** via the **Openverse API**,
+> which returns real URLs plus author and licence metadata. Everything resolved to **CC0**
+> StockSnap and rawpixel photography.
+
+Per image, the pipeline accepts a candidate only if it returns HTTP 200, a real `image/*`
+content type, a sane byte size, the right aspect ratio, **and the subject actually matches the
+item**. That last one is a human judgement call — the first pass over Openverse returned a
+photo of a *printer instruction card* for "espresso" and a *Starbucks cup* for "cappuccino",
+both discarded.
+
+> **Rule: never ship a photo that might be the wrong drink.** A mislabelled flat white is a
+> correctness bug, not a polish gap.
+
+### Adding or swapping a photo
+
+```bash
+# 1. edit app/data/photo-sources.json — url, licence, author, page
+# 2. rebuild the assets and regenerate the manifest
+npm run photos:fetch
+# 3. verify the manifest, the files and the attribution agree
+npm run photos:check
+```
+
+`app/data/photos.ts` is **generated** — edit `photo-sources.json`, not the output.
+The landing footer credits are rendered from the same manifest, so attribution cannot drift
+from the assets actually in the bundle. Third-party entries are credited with `utm` referral
+links; `generated` entries correctly render no credit line.
 
 ---
 
 ## 📁 Project Structure
 
 ```
-coffeeShop-frontend/
-├── README.md                 # ← you are here (prototype + production plan)
-└── ui/                       # Nuxt application
-    ├── app/
-    │   ├── app.vue
-    │   ├── assets/css/main.css
-    │   ├── components/
-    │   │   ├── cart/         # CartPanel, CartItem, CartFooter
-    │   │   ├── menu/         # MenuSidebar, MenuGrid, MenuCard, MenuSearchBar
-    │   │   ├── orders/OrderCard.vue
-    │   │   ├── ui/ThemeToggle.vue
-    │   │   └── ReceiptModal.vue
-    │   ├── composables/
-    │   │   ├── useCart.ts    # cart state + localStorage
-    │   │   └── useOrders.ts  # orders state + status machine
-    │   ├── data/
-    │   │   ├── menu.json     # static menu (12 items)
-    │   │   └── categories.json
-    │   ├── pages/
-    │   │   ├── index.vue     # POS main view
-    │   │   └── orders.vue    # orders dashboard
-    │   └── types/menu.ts
-    ├── public/images/
-    ├── nuxt.config.ts
-    ├── package.json
-    └── tsconfig.json
+ui/
+├── app/
+│   ├── app.vue                     # TooltipProvider, theme no-flash script, Toaster
+│   ├── assets/css/
+│   │   ├── main.css                # imports + base layer + component utilities
+│   │   ├── theme.css               # colour tokens, type scale, radius, elevation
+│   │   └── motion.css              # motion tokens, keyframes, reduced-motion guard
+│   │
+│   ├── components/
+│   │   ├── ui/                     # shadcn-vue primitives — CLI-MANAGED, don't hand-edit
+│   │   │   └── <name>/{Component.vue,index.ts}   (25 groups)
+│   │   ├── motion/                 # React Bits patterns via motion-v
+│   │   ├── layout/                 # SiteNav, SiteFooter, SiteBrand, PosHeader, ThemeToggle
+│   │   ├── landing/                # Hero, FeaturesBento, MenuShowcase, HowItWorks, …
+│   │   ├── menu/                   # MenuCard, MenuGrid, MenuSidebar
+│   │   ├── cart/                   # CartPanel, CartItem, CartFooter
+│   │   ├── orders/                 # OrderCard, OrderKpis
+│   │   ├── CustomersDialog.vue     # shared dialogs
+│   │   ├── ReceiptDialog.vue
+│   │   └── PrototypeNoticeDialog.vue
+│   │
+│   ├── composables/                # reactive state
+│   │   ├── useCart.ts  useOrders.ts  useCustomers.ts
+│   │   ├── useTheme.ts  useMotionPreset.ts
+│   ├── constants/                  # static lookup tables
+│   │   ├── order-status.ts         # STATUS_META, STATUS_FLOW
+│   │   └── site.ts                 # brand, nav links, routes
+│   ├── data/                       # content
+│   │   ├── menu.json  categories.json
+│   │   ├── photos.ts               # GENERATED manifest
+│   │   └── photo-sources.json      # curated source of truth
+│   ├── layouts/                    # landing.vue, pos.vue
+│   ├── lib/                        # pure helpers (NOT auto-imported)
+│   │   ├── cva.ts  currency.ts  date.ts
+│   │   └── initials.ts  split.ts  receipt.ts
+│   ├── pages/                      # index.vue (landing), pos.vue, orders.vue
+│   ├── types/                      # menu.ts, order.ts, photo.ts
+│   └── utils/index.ts              # auto-import surface; re-exports lib/
+│
+├── scripts/
+│   ├── fetch-photos.mjs            # photo-sources.json → public/images + photos.ts
+│   └── check-photos.mjs            # validates manifest, files, attribution, menu links
+├── public/images/{menu,ambience}/
+├── components.json                 # shadcn-vue config
+└── nuxt.config.ts
 ```
 
-Key config — `ui/nuxt.config.ts:2`:
+### Conventions worth knowing
+
+| Rule | Why |
+|---|---|
+| `components/ui/` is **shadcn-vue only**, never hand-edited | the CLI overwrites it; local edits break on the next `add` |
+| Feature folders named after the **user-facing surface** | you can guess the folder from the screen |
+| `constants/` ≠ `composables/` ≠ `lib/` | static tables vs reactive state vs pure functions |
+| `types/` owns domain types | no more `Order` living inside a composable |
+| Implementations in `lib/`, barrel in `utils/` | `utils/` is auto-scanned; `lib/` isn't, so each name registers once and `@/utils` still resolves for shadcn |
+| No barrel files in `components/` | Nuxt auto-imports; barrels only add indirection |
+
+### Key config
+
 ```ts
+// ui/nuxt.config.ts
 export default defineNuxtConfig({
-  compatibilityDate: '2024-11-01',
-  devtools: { enabled: true },
-  modules: ['@nuxt/ui'],
+  modules: ['shadcn-nuxt', '@nuxt/image'],
   css: ['~/assets/css/main.css'],
+  components: [
+    // shadcn registers its own with an empty prefix; exclude it here so the
+    // two scanners don't fight over a name.
+    { path: '~/components', pathPrefix: false, ignore: ['**/ui/**'] },
+  ],
+  shadcn: { prefix: '', componentDir: '@/components/ui' },
+  vite: { plugins: [tailwindcss()] },
   app: { pageTransition: { name: 'page', mode: 'out-in' } },
-  components: [{ path: '~/components', pathPrefix: false }],
-  ui: { theme: { colors: ['primary','secondary','neutral','success','warning','error'] } }
 })
 ```
 
@@ -133,7 +356,7 @@ export default defineNuxtConfig({
 
 ### Prerequisites
 
-- **Node.js** `>= 20` (verify: `node -v`)
+- **Node.js** `>= 22.19` (verify: `node -v`)
 - `npm` / `pnpm` / `yarn` / `bun`
 
 ### Install & Run
@@ -141,19 +364,25 @@ export default defineNuxtConfig({
 ```bash
 cd ui
 npm install        # or pnpm install / yarn / bun install
-
-# dev server — http://localhost:3000
-npm run dev
-
-# production build + preview
-npm run build
-npm run preview   # or npm run generate for static
-
-# Nuxt prepare (postinstall hook)
-npx nuxt prepare
+npm run dev        # http://localhost:3000
 ```
 
-No env vars required for the prototype (see [Environment Variables](#-environment-variables) for production).
+```bash
+npm run build      # production build (Nitro)
+npm run preview    # preview the production build
+npm run generate   # pre-render static
+```
+
+No environment variables are required for the prototype.
+
+### Adding a shadcn component
+
+```bash
+npx shadcn-vue@latest add <component> --yes
+```
+
+It writes into `app/components/ui/` and registers automatically via the `shadcn-nuxt` module.
+Don't edit anything in that folder by hand.
 
 ---
 
@@ -165,9 +394,10 @@ No env vars required for the prototype (see [Environment Variables](#-environmen
 | `build` | `nuxt build` | Production build (Nitro) |
 | `generate` | `nuxt generate` | Pre-render static site |
 | `preview` | `nuxt preview` | Preview production build locally |
+| `typecheck` | `nuxt typecheck` | `vue-tsc --noEmit` over the whole app |
+| `photos:fetch` | `node scripts/fetch-photos.mjs` | Download, crop, encode and regenerate `photos.ts` |
+| `photos:check` | `node scripts/check-photos.mjs` | Validate manifest ↔ disk ↔ attribution ↔ menu |
 | `postinstall` | `nuxt prepare` | Generate `.nuxt` types |
-
-Defined in `ui/package.json:5`.
 
 ---
 
@@ -197,199 +427,154 @@ In `nuxt.config.ts` expose via `runtimeConfig`:
 ```ts
 runtimeConfig: {
   apiSecret: process.env.NUXT_API_SECRET,
-  public: { apiBase: process.env.NUXT_PUBLIC_API_BASE }
+  public: { apiBase: process.env.NUXT_PUBLIC_API_BASE },
 }
 ```
 
-And document in `ui/.env.example` (commit the example, gitignore the real `.env` — already covered in `ui/.gitignore:22`).
+And document it in `ui/.env.example` (commit the example, gitignore the real `.env`).
 
 ---
 
 ## 🏗 Architecture Notes (Prototype)
 
-- **State:** `useState()` singletons keyed by storage key (`coffee_shop_cart`, `coffee_shop_orders`). `watch(..., { deep: true })` syncs to `localStorage` on client only (`import.meta.client` guard). No SSR hydration for cart/orders.
-- **Order lifecycle:** `OrderStatus = 'pending' | 'preparing' | 'ready' | 'completed' | 'cancelled'` with `STATUS_META` for color/icon. Status mutates in-place (`ui/app/composables/useOrders.ts:92`).
-- **Data:** static JSON imported at build time (`ui/app/pages/index.vue:4`). No fetch, no pagination.
-- **No backend:** price is trusted from client (`useCart.ts:70` computes total from menu). Must be re-validated server-side for production.
-- **IDs:** `crypto.randomUUID()` for customers/orders — requires secure context (HTTPS).
+- **State:** `useState()` singletons keyed by storage key. A `watch(..., { deep: true })` syncs to
+  `localStorage` on the client only. Cart and orders are deliberately **not** SSR-hydrated —
+  there is no backend to hydrate from. All storage writes are wrapped in `try/catch`: in private
+  browsing or with storage disabled the session still works, it just won't persist.
+- **Order lifecycle:** `OrderStatus = 'pending' | 'preparing' | 'ready' | 'completed' | 'cancelled'`
+  with `STATUS_META` in `constants/order-status.ts`. Statuses mutate in place.
+- **Revenue** excludes cancelled orders, on the orders page and the KPI tile alike.
+- **Equal split** is cent-accurate: `lib/split.ts` works in integer cents, hands out the base
+  share, then distributes the leftover cent to the first *n* people. `100.00 / 3 → 33.34, 33.33, 33.33`.
+- **Split receipts hold the whole cart.** When a bill is split equally, every customer receipt
+  contains a copy of every item, so `OrderCard` shows the first customer's items rather than
+  summing (which would multiply quantities). It only merges when receipts genuinely differ.
+- **Data:** static JSON imported at build time. No fetch, no pagination.
+- **No backend:** price is trusted from the client and must be re-validated server-side for production.
+- **IDs:** `crypto.randomUUID()` for customers/orders — requires a secure context (HTTPS).
+- **Theme:** no flash on load. A tiny inline script in `app.vue` applies the stored class before
+  first paint; `useTheme` then adopts it so SSR markup and client state agree.
 
 ---
 
 ## ✅ Production Readiness Roadmap
 
-Use this as the **Definition of Done** before tagging `v1.0.0` and deploying to production.
+Use this as the **Definition of Done** before tagging `v1.0.0` and deploying.
 
 ### 1. Backend & Data
-
-- [ ] Replace `localStorage` with real persistence. Options:
-  - **Option A (Recommended):** Nuxt `server/api/*` + DB (Postgres via Drizzle/Prisma) + Nitro.
-  - **Option B:** Separate backend (NestJS/Express/Go) — frontend calls via `NUXT_PUBLIC_API_BASE`.
-- [ ] Migrate `menu.json` / `categories.json` to DB + admin CRUD. Add `server/api/menu.get.ts`, `orders.post.ts`, etc.
-- [ ] Server-side price authority — never trust client total; recalculate on server.
-- [ ] Pagination, filtering, and search on server for large menus/orders.
-- [ ] Database migrations, seeds, backups.
+- [ ] Replace `localStorage` with real persistence (Nuxt `server/api/*` + DB via Drizzle/Prisma, or a separate backend)
+- [ ] Move `menu.json` / `categories.json` to DB + admin CRUD
+- [ ] Server-side price authority — never trust the client total
+- [ ] Pagination, filtering and search on the server
+- [ ] Migrations, seeds, backups
 
 ### 2. API & Validation
-
-- [ ] Define OpenAPI / `zod` schemas for `MenuItem`, `CartItem`, `CustomerReceipt`, `Order`. Share types via `~/types`.
-- [ ] Add `zod` validation on every `server/api` handler + client forms (`@vee-validate/zod` or similar).
-- [ ] Standardize error format (`{ error, code, details }`) and HTTP status usage.
+- [ ] OpenAPI / `zod` schemas for `MenuItem`, `CartItem`, `CustomerReceipt`, `Order`
+- [ ] Validate every `server/api` handler and every client form
+- [ ] Standardise error format (`{ error, code, details }`)
 
 ### 3. Authentication & Authorization
+- [ ] Auth with roles: `customer`, `barista`, `admin`
+- [ ] Protect `/orders` and all mutations; scope orders to a session
+- [ ] CSRF, secure cookies, `httpOnly` JWT, refresh flow
 
-- [ ] Add auth (`@sidebase/nuxt-auth` / Auth.js, or Supabase/Auth0). Roles: `customer`, `barista`, `admin`.
-- [ ] Protect `/orders` and order mutations; scope orders to user/session.
-- [ ] CSRF, secure cookies, `httpOnly` JWT, refresh flow.
-
-### 4. Payments (if selling)
-
-- [ ] Integrate payment provider (Stripe/PayMongo/GCash). Never handle raw card data.
-- [ ] Webhook handler for payment confirmation → order status `completed`.
-- [ ] Idempotency keys for order creation.
+### 4. Payments
+- [ ] Payment provider (Stripe/PayMongo/GCash). Never handle raw card data
+- [ ] Webhook for payment confirmation → `completed`
+- [ ] Idempotency keys on order creation
 
 ### 5. Configuration & Environments
-
-- [ ] Add `runtimeConfig` + `.env.example` (see above). Document every var.
-- [ ] Separate configs for `development` / `staging` / `production`.
-- [ ] Disable `devtools` in production: `devtools: { enabled: process.env.NODE_ENV !== 'production' }`.
+- [ ] `runtimeConfig` + `.env.example`, every var documented
+- [ ] Separate configs for development / staging / production
+- [ ] Devtools already disabled in production via `NODE_ENV`
 
 ### 6. Code Quality
-
-- [ ] **Lint/Format:** `eslint` (`@nuxt/eslint` + `eslint-config-prettier`) + `prettier` + `lint-staged` + `husky` pre-commit.
-- [ ] **Typecheck:** `vue-tsc --noEmit` in CI.
-- [ ] **Conventions:** `pnpm` lockfile, `engines` field, `.nvmrc` / `.node-version`.
+- [ ] **Lint/Format:** `@nuxt/eslint` + `prettier` + `lint-staged` + `husky`
+- [ ] **Typecheck:** `npm run typecheck` in CI (already available)
+- [ ] Conventions: lockfile, `engines` (already set), `.nvmrc`
 
 ### 7. Testing
-
-- [ ] **Unit:** `vitest` for `useCart`, `useOrders`, price math, status transitions.
-- [ ] **Component:** `@vue/test-utils` / `@nuxt/test-utils` for `MenuCard`, `CartPanel`, `OrderCard`, `ReceiptModal`.
-- [ ] **E2E:** `playwright` — critical paths: add to cart → split → place order → filter orders → change status.
-- [ ] Coverage threshold (e.g., 80%) enforced in CI.
+- [ ] **Unit:** `vitest` for `useCart`, `useCustomers`, `splitTotalEqually`, `formatPeso`, status transitions
+- [ ] **Component:** `@vue/test-utils` / `@nuxt/test-utils` for `MenuCard`, `CartPanel`, `OrderCard`
+- [ ] **E2E:** `playwright` — add to cart → split → place order → filter → change status
+- [ ] 80% coverage enforced in CI
 
 ### 8. CI/CD
-
-- [ ] GitHub Actions workflow:
-  ```yaml
-  # .github/workflows/ci.yml — lint → typecheck → test → build
-  on: [push, pull_request]
-  jobs:
-    ci: { runs-on: ubuntu-latest, steps: [checkout, setup-node, pnpm install, lint, typecheck, test, build] }
-  ```
-- [ ] Branch protection (`main` requires passing CI).
-- [ ] Preview deployments (Vercel/Netlify/Cloudflare) + production deploys on tag.
+- [ ] GitHub Actions: lint → typecheck → test → build
+- [ ] Branch protection on `main`
+- [ ] Preview deployments + production deploys on tag
 
 ### 9. Security
+- [ ] CSP / HSTS / X-Frame-Options / X-Content-Type-Options via `routeRules` or Nitro
+- [ ] Sanitise customer names — validate length and charset
+- [ ] Dependency audit, Dependabot/Renovate
+- [ ] Rate limit order creation; scan for secrets (gitleaks)
 
-- [ ] Security headers via `routeRules` / Nitro: `Content-Security-Policy`, `X-Frame-Options`, `Strict-Transport-Security`, `X-Content-Type-Options`.
-- [ ] Sanitize all user inputs (customer names) — escape on render, validate length/charset.
-- [ ] Dependency audit (`npm audit` / `pnpm audit`, Dependabot/Renovate).
-- [ ] Rate limiting on order creation.
-- [ ] No secrets in repo — scan with `gitleaks`.
-
-### 10. Observability & Ops
-
-- [ ] Error tracking: Sentry (`@sentry/nuxt`) or equivalent.
-- [ ] Logging: structured logs (pino) + correlation IDs; never log PII.
-- [ ] Analytics: privacy-respecting (Plausible/PostHog) if needed.
-- [ ] Health check endpoint (`server/api/health.get.ts`).
+### 10. Observability
+- [ ] Sentry (`@sentry/nuxt`) or equivalent
+- [ ] Structured logs, correlation IDs, never log PII
+- [ ] `server/api/health.get.ts`
 
 ### 11. Performance & UX
-
-- [ ] Image optimization: `<NuxtImg>` (`@nuxt/image`), WebP, lazy-load, explicit `width`/`height`.
-- [ ] Code splitting & route lazy-loading (Nuxt does this — verify bundle via `nuxi analyze`).
-- [ ] `routeRules` caching: `swr` for menu, `no-store` for orders.
-- [ ] A11y audit (axe, Lighthouse), keyboard nav for drawers/modals, `aria-*` on status filters (`ui/app/pages/orders.vue:127`).
-- [ ] i18n if multi-region (`@nuxtjs/i18n`), currency formatting via `Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' })`.
-- [ ] SEO: `useHead` / `useSeoMeta`, OG tags, `robots.txt`, `sitemap`.
+- [x] Image optimization — `@nuxt/image`, AVIF/WebP, responsive `sizes`, explicit dimensions
+- [x] Code splitting & route-level lazy loading
+- [ ] `routeRules` caching: `swr` for menu, `no-store` for orders
+- [ ] A11y audit (axe, Lighthouse); verify keyboard nav through sheets and dialogs
+- [ ] i18n if multi-region
+- [ ] `robots.txt` and sitemap (the file currently declines all crawlers)
 
 ### 12. Deployment Hardening
-
-- [ ] **Dockerfile** (multi-stage) or platform adapter (`@nuxthub/vercel`, Node preset).
-- [ ] Non-root container user, `NODE_ENV=production`.
-- [ ] CDN + edge caching for static assets; `public/` hashed.
-- [ ] Backup/restore runbook, rollback plan, on-call.
-
-#### Suggested `routeRules` example
-
-```ts
-// nuxt.config.ts
-routeRules: {
-  '/':        { swr: 60 },
-  '/orders': { ssr: false }, // or auth-guarded ssr
-  '/api/**': { cors: true },
-}
-nitro: { preset: 'node-server' } // or 'vercel', 'cloudflare-pages'
-```
-
-#### Suggested `Dockerfile` skeleton
-
-```dockerfile
-FROM node:22-alpine AS build
-WORKDIR /app
-COPY ui/package*.json ./
-RUN npm ci
-COPY ui/ ./
-RUN npm run build
-
-FROM node:22-alpine
-WORKDIR /app
-COPY --from=build /app/.output ./.output
-ENV NODE_ENV=production
-EXPOSE 3000
-CMD ["node", ".output/server/index.mjs"]
-```
+- [ ] Multi-stage `Dockerfile` or a platform adapter
+- [ ] Non-root container user, `NODE_ENV=production`
+- [ ] CDN + edge caching for static assets
+- [ ] Backup/restore runbook, rollback plan
 
 ---
 
 ## 📦 Deployment
 
-### Current (prototype)
-
 ```bash
 cd ui
-npm run build        # → .output/
-npm run preview      # preview at http://localhost:3000
-# or
-npm run generate     # → .output/public for static hosts
+npm run build      # → .output/
+npm run preview    # preview at http://localhost:3000
+npm run generate   # → .output/public for static hosts
 ```
 
-Deploy `.output/` to any Node host, or `.output/public` to static hosts if using `generate`.
+Deploy `.output/` to any Node host, or `.output/public` to static hosts using `generate`.
 
-### Production (after roadmap)
-
-1. Set env vars on host (Vercel / Fly.io / Render / Docker / Cloudflare).
-2. Ensure `DATABASE_URL`, `AUTH_SECRET`, etc. are set.
-3. Run DB migrations.
-4. `npm run build` in CI, deploy artifact.
-5. Smoke-test `/api/health`, then promote.
-
-Official docs: [Nuxt Deployment](https://nuxt.com/docs/getting-started/deployment).
+> Static generation works, but every route is effectively a shell: the cart and order history
+> live in the visitor's browser, so there is nothing server-side to cache.
 
 ---
 
 ## 🛡 Quality, Security & Operations
 
-| Concern | Prototype | Production Target |
+| Concern | Current | Target |
 |---|---|---|
 | **Lint** | None | `eslint` + `prettier` + pre-commit hook |
-| **Types** | Nuxt auto (`tsconfig.json:5` refs) | `vue-tsc --noEmit` in CI, `strict: true` |
+| **Types** | `npm run typecheck` passes clean | Enforced in CI |
 | **Tests** | None | `vitest` + `playwright`, 80%+ coverage |
 | **CI** | None | GitHub Actions (lint/typecheck/test/build) |
+| **Images** | `npm run photos:check` validates the manifest | Enforced in CI |
 | **Errors** | `console` | Sentry + structured logs |
 | **Headers** | Default | CSP/HSTS/XFO via Nitro |
 | **Secrets** | N/A | Env + vault, never committed |
+| **Reduced motion** | Honoured globally | Keep |
 
 ---
 
 ## ⚠️ Known Limitations / Gaps
 
-- Orders/cart lost on clear-site-data, private browsing, or different device (localStorage-only).
+- Orders and cart are lost on clear-site-data, private browsing, or a different device.
 - No conflict resolution if two tabs mutate `localStorage` (no `storage` event sync).
-- No input sanitization beyond `trim()` / duplicate check (`ui/app/pages/index.vue:40`).
-- `crypto.randomUUID()` fails in insecure contexts (HTTP).
-- No pagination — all orders rendered; will degrade with 100s of orders.
+- No input sanitisation beyond `trim()` and a duplicate-name check.
+- `crypto.randomUUID()` fails in insecure contexts (plain HTTP).
+- No pagination — all orders render; this will degrade with hundreds of orders.
 - No offline support, no optimistic updates, no retry.
-- Images in `menu.json` use mixed casing/spaces (`Capuccino.png`, `flat white.png`) — normalize filenames for case-sensitive hosts.
+- Receipt printing opens a popup; browsers may block it without a user gesture.
+- `public/robots.txt` currently declines **all** crawlers, since this is a staging prototype. Switch it to an allow-list when a real origin exists.
+- Photography is CC0 stock, not bespoke art direction. Swapping in a real shoot means
+  replacing files in `public/images/` and re-running `npm run photos:fetch`.
 
 ---
 
@@ -397,8 +582,16 @@ Official docs: [Nuxt Deployment](https://nuxt.com/docs/getting-started/deploymen
 
 1. Branch from `main`: `git checkout -b feat/your-feature`
 2. `cd ui && npm install && npm run dev`
-3. Follow conventional commits (`feat:`, `fix:`, `chore:`).
-4. Open PR — CI must pass (once added). Include screenshots for UI changes.
+3. Before opening a PR: `npm run typecheck && npm run photos:check`
+4. Follow conventional commits (`feat:`, `fix:`, `chore:`)
+5. Open a PR with screenshots for UI changes
+
+**Adding a photo:** edit `app/data/photo-sources.json`, run `npm run photos:fetch`, then
+`npm run photos:check`. Never edit `app/data/photos.ts` directly — it's generated. Always record
+the author and licence; `photos:check` fails the build without them.
+
+**Adding a shadcn component:** `npx shadcn-vue@latest add <name> --yes`. Don't hand-edit
+`app/components/ui/` — the CLI owns it.
 
 ---
 
@@ -408,4 +601,6 @@ MIT — see `LICENSE` (add one if missing). Prototype provided as-is without war
 
 ---
 
-> **Maintainer note:** When this checklist is complete, remove the prototype warning at the top, replace it with a production badge, and tag `v1.0.0`. Until then, every deployment should be labeled **prototype / staging only**.
+> **Maintainer note:** When the roadmap is complete, remove the prototype warning at the top,
+> replace it with a production badge, and tag `v1.0.0`. Until then, every deployment should be
+> labeled **prototype / staging only**.

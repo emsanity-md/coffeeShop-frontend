@@ -1,14 +1,24 @@
 [
-  { "id": 1, "name": "Espresso", "desc": "Strong & bold", "price": 85, "cat": "coffee", "icon": "☕", "image": "/images/Espresso.png" },
-  { "id": 2, "name": "Cappuccino", "desc": "Espresso with foam", "price": 130, "cat": "coffee", "icon": "☕", "image": "/images/Capuccino.png" },
-  { "id": 3, "name": "Latte", "desc": "Smooth milk coffee", "price": 140, "cat": "coffee", "icon": "🥛", "image": "/images/Latte.png" },
-  { "id": 4, "name": "Americano", "desc": "Espresso & water", "price": 110, "cat": "coffee", "icon": "☕", "image": "/images/Americano.png" },
-  { "id": 5, "name": "Cold brew", "desc": "Slow steeped 12hr", "price": 160, "cat": "cold", "icon": "🧊" },
-  { "id": 6, "name": "Matcha latte", "desc": "Japanese green tea", "price": 150, "cat": "tea", "icon": "🍵" },
-  { "id": 7, "name": "Earl grey", "desc": "Classic bergamot", "price": 100, "cat": "tea", "icon": "🫖" },
-  { "id": 8, "name": "Croissant", "desc": "Butter, flaky", "price": 95, "cat": "pastry", "icon": "🥐" },
-  { "id": 9, "name": "Muffin", "desc": "Blueberry or choco", "price": 80, "cat": "pastry", "icon": "🧁" },
-  { "id": 10, "name": "Iced mocha", "desc": "Chilled & creamy", "price": 155, "cat": "cold", "icon": "🧃" },
-  { "id": 11, "name": "Flat white", "desc": "Velvety microfoam", "price": 135, "cat": "coffee", "icon": "☕", "image": "/images/flat white.png" },
-  { "id": 12, "name": "Chai latte", "desc": "Spiced & warming", "price": 125, "cat": "tea", "icon": "🍵" }
-]
+  { "id": 1, "name": "Espresso", "desc": "Strong & bold", "price": 85, "cat": "coffee", "icon": "☕", "image": "espresso" },
+  { "id": 2, "name": "Cappuccino", "desc": "Espresso with foam", "price": 130, "cat": "coffee", "icon": "☕", "image": "cappuccino" },
+  { "id": 3, "name": "Latte", "desc": "Smooth milk coffee", "price": 140, "cat": "coffee", "icon": "🥛", "image": "latte" },
+  { "id": 4, "name": "Americano", "desc": "Espresso & water", "price": 110, "cat": "coffee", "icon": "☕", "image": "americano" },
+  { "id": 5, "name": "Flat white", "desc": "Velvety microfoam", "price": 135, "cat": "coffee", "icon": "☕", "image": "flat-white" },
+  { "id": 6, "name": "Cortado", "desc": "Espresso cut with milk", "price": 120, "cat": "coffee", "icon": "☕", "image": "cortado" },
+  { "id": 7, "name": "Mocha", "desc": "Chocolate & espresso", "price": 150, "cat": "coffee", "icon": "🍫", "image": "mocha" },
+
+  { "id": 8, "name": "Cold brew", "desc": "Slow steeped 12hr", "price": 160, "cat": "cold", "icon": "🧊", "image": "cold-brew" },
+  { "id": 9, "name": "Iced mocha", "desc": "Chilled & creamy", "price": 155, "cat": "cold", "icon": "🧃", "image": "iced-mocha" },
+  { "id": 10, "name": "Iced latte", "desc": "Over ice, long pour", "price": 145, "cat": "cold", "icon": "🧊", "image": "iced-latte" },
+  { "id": 11, "name": "Iced tea", "desc": "House-brewed, citrus", "price": 110, "cat": "cold", "icon": "🍹", "image": "iced-tea" },
+
+  { "id": 12, "name": "Matcha latte", "desc": "Japanese green tea", "price": 150, "cat": "tea", "icon": "🍵", "image": "matcha" },
+  { "id": 13, "name": "Earl grey", "desc": "Classic bergamot", "price": 100, "cat": "tea", "icon": "🫖", "image": "earl-grey" },
+  { "id": 14, "name": "Chai latte", "desc": "Spiced & warming", "price": 125, "cat": "tea", "icon": "🍵", "image": "chai-latte" },
+  { "id": 15, "name": "Green tea", "desc": "Loose leaf, brewed", "price": 95, "cat": "tea", "icon": "🍵", "image": "green-tea" },
+
+  { "id": 16, "name": "Croissant", "desc": "Butter, flaky", "price": 95, "cat": "pastry", "icon": "🥐", "image": "croissant" },
+  { "id": 17, "name": "Pain au chocolat", "desc": "Dark chocolate batons", "price": 120, "cat": "pastry", "icon": "🥐", "image": "pain-au-chocolat" },
+  { "id": 18, "name": "Muffin", "desc": "Blueberry or choco", "price": 80, "cat": "pastry", "icon": "🧁", "image": "muffin" },
+  { "id":19, "name": "Banana bread", "desc": "Toasted, brown sugar", "price": 110, "cat": "pastry", "icon": "🍌", "image": "banana-bread" }
+  ]

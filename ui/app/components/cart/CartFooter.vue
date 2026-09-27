@@ -1,36 +1,76 @@
 <script setup lang="ts">
-import type { CartItem } from '~/types/menu'
+/**
+ * Sticky cart footer: the running total, the customer split (when there is one)
+ * and the place-order action. Kept out of the scroll area so the total and the
+ * primary action are always reachable.
+ */
+import { Users } from '@lucide/vue'
+import { Button } from '~/components/ui/button'
+import type { CartItem, Customer } from '~/types/menu'
+import type { CustomerReceipt } from '~/types/order'
+import { formatPeso } from '~/utils'
 
 defineProps<{
   items: CartItem[]
   total: number
+  customers: Customer[]
+  receipts: CustomerReceipt[]
+  canPlaceOrder: boolean
 }>()
 
-defineEmits<{ (e: 'placeOrder'): void }>()
+const emit = defineEmits<{
+  (e: 'placeOrder'): void
+  (e: 'viewReceipt', receipt: CustomerReceipt): void
+}>()
 </script>
 
 <template>
-  <div class="p-4 border-t space-y-2" style="border-color: var(--border-color)">
+  <div class="shrink-0 space-y-2.5 border-t border-border bg-card p-3.5">
+    <!-- Per-customer shares, only meaningful once customers exist. -->
+    <div v-if="receipts.length" class="space-y-1">
+      <div
+        v-for="receipt in receipts"
+        :key="receipt.id"
+        class="flex items-baseline justify-between gap-2 text-meta"
+      >
+        <button
+          type="button"
+          class="flex min-w-0 items-center gap-1.5 truncate text-left text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
+          @click="emit('viewReceipt', receipt)"
+        >
+          <Users class="size-3 shrink-0" />
+          <span class="truncate">{{ receipt.name }}</span>
+        </button>
+        <span class="tnum shrink-0 font-medium text-foreground">
+          {{ formatPeso(receipt.total) }}
+        </span>
+      </div>
+    </div>
+
     <div
-      v-for="item in items"
-      :key="item.id"
-      class="flex justify-between text-xs"
-      style="color: var(--text-muted)"
+      v-if="receipts.length"
+      class="flex items-baseline justify-between border-t border-border pt-2.5"
     >
-      <span class="truncate mr-2">
-        {{ item.name }}
-        <span class="opacity-60">× {{ item.qty }}</span>
+      <span class="text-label text-muted-foreground">Order total</span>
+      <span class="tnum font-mono text-section font-semibold">
+        {{ formatPeso(total) }}
       </span>
-      <span class="shrink-0">₱{{ (item.price * item.qty).toFixed(2) }}</span>
     </div>
 
-    <div class="flex justify-between text-sm font-medium pt-2 border-t"
-      style="border-color: var(--border-color); color: var(--text-primary)">
-      <span>Total</span><span>₱{{ total.toFixed(2) }}</span>
-    </div>
+    <Button
+      class="w-full"
+      size="lg"
+      :disabled="!canPlaceOrder"
+      @click="emit('placeOrder')"
+    >
+      {{ customers.length ? 'Place split order' : 'Place order' }}
+    </Button>
 
-    <UButton block color="primary" class="mt-2" @click="$emit('placeOrder')">
-      Place order
-    </UButton>
+    <p
+      v-if="!customers.length && items.length"
+      class="text-center text-meta text-muted-foreground"
+    >
+      Add at least one customer to check out
+    </p>
   </div>
 </template>

@@ -1,33 +1,10 @@
 import { computed, watch } from 'vue'
 import type { CartItem } from '~/types/menu'
+import type { Order, OrderStatus, CustomerReceipt } from '~/types/order'
+import { ORDER_STATUSES } from '~/constants/order-status'
 
-export type OrderStatus = 'pending' | 'preparing' | 'ready' | 'completed' | 'cancelled'
-
-export interface CustomerReceipt {
-  id: string
-  name: string
-  items: CartItem[]
-  total: number
-}
-
-export interface Order {
-  id: string
-  customers: CustomerReceipt[]
-  total: number
-  date: string
-  splitEqually: boolean
-  status: OrderStatus
-}
-
-export const ORDER_STATUSES: OrderStatus[] = ['pending', 'preparing', 'ready', 'completed', 'cancelled']
-
-export const STATUS_META: Record<OrderStatus, { label: string; color: 'warning' | 'primary' | 'success' | 'neutral' | 'error'; icon: string }> = {
-  pending: { label: 'Pending', color: 'warning', icon: 'i-heroicons-clock' },
-  preparing: { label: 'Preparing', color: 'primary', icon: 'i-heroicons-fire' },
-  ready: { label: 'Ready', color: 'success', icon: 'i-heroicons-bell' },
-  completed: { label: 'Completed', color: 'neutral', icon: 'i-heroicons-check-circle' },
-  cancelled: { label: 'Cancelled', color: 'error', icon: 'i-heroicons-x-circle' },
-}
+export type { Order, OrderStatus, CustomerReceipt } from '~/types/order'
+export { ORDER_STATUSES, STATUS_META, STATUS_FLOW, TERMINAL_STATUSES } from '~/constants/order-status'
 
 const VALID_STATUSES = new Set<string>(ORDER_STATUSES)
 
@@ -58,7 +35,12 @@ function loadOrders(): Order[] {
 
 function saveOrders(orders: Order[]) {
   if (typeof window === 'undefined') return
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(orders))
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(orders))
+  } catch {
+    // Quota exceeded or storage disabled (private mode) — the in-memory
+    // session still works, it just won't survive a reload.
+  }
 }
 
 export function useOrders() {
@@ -71,7 +53,7 @@ export function useOrders() {
     }
   }
 
-  watch(orders, (newOrders) => {
+  watch(orders, newOrders => {
     saveOrders(newOrders)
   }, { deep: true })
 
@@ -107,9 +89,9 @@ export function useOrders() {
     saveOrders(orders.value)
   }
 
+  /** Cancelled orders are excluded — they are not revenue. */
   const sortedOrders = computed(() =>
-    [...orders.value].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-  )
+    [...orders.value].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()))
 
   return { orders: sortedOrders, addOrder, updateOrderStatus, deleteOrder, clearOrders }
 }

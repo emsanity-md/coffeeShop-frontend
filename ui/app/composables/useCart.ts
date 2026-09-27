@@ -15,7 +15,11 @@ function loadCart(): Record<number, number> {
 
 function saveCart(cart: Record<number, number>) {
   if (typeof window === 'undefined') return
-  localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart))
+  try {
+    localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart))
+  } catch {
+    // Storage unavailable — session stays usable, it just won't persist.
+  }
 }
 
 export function useCart(menu: MenuItem[]) {
@@ -28,7 +32,7 @@ export function useCart(menu: MenuItem[]) {
     }
   }
 
-  watch(cart, (newCart) => {
+  watch(cart, newCart => {
     saveCart(newCart)
   }, { deep: true })
 
@@ -46,7 +50,7 @@ export function useCart(menu: MenuItem[]) {
   }
 
   function removeFromCart(id: number) {
-    const { [id]: _, ...rest } = cart.value
+    const { [id]: _removed, ...rest } = cart.value
     cart.value = rest
   }
 
@@ -55,20 +59,18 @@ export function useCart(menu: MenuItem[]) {
   }
 
   const cartItems = computed(() =>
-    Object.entries(cart.value).map(([id, qty]) => {
-      const menuItem = menu.find(m => m.id === Number(id))
-      if (!menuItem) return null
-      return { ...menuItem, qty }
-    }).filter(Boolean) as (MenuItem & { qty: number })[]
+    Object.entries(cart.value)
+      .map(([id, qty]) => {
+        const menuItem = menu.find(m => m.id === Number(id))
+        if (!menuItem) return null
+        return { ...menuItem, qty }
+      })
+      .filter(Boolean) as (MenuItem & { qty: number })[],
   )
 
-  const cartCount = computed(() =>
-    Object.values(cart.value).reduce((s, q) => s + q, 0)
-  )
+  const cartCount = computed(() => Object.values(cart.value).reduce((s, q) => s + q, 0))
 
-  const total = computed(() => {
-    return cartItems.value.reduce((s, i) => s + i.price * i.qty, 0)
-  })
+  const total = computed(() => cartItems.value.reduce((s, i) => s + i.price * i.qty, 0))
 
   return { cart, cartItems, cartCount, total, addToCart, changeQty, removeFromCart, clearCart }
 }

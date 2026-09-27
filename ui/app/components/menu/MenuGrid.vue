@@ -1,56 +1,81 @@
 <script setup lang="ts">
+/**
+ * Menu grid. Renders either the grouped view (all categories) or a flat filtered
+ * list. Both use the same stagger and transition-group treatment.
+ */
+import { SearchX } from '@lucide/vue'
+import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '~/components/ui/empty'
+import { Button } from '~/components/ui/button'
 import type { MenuItem } from '~/types/menu'
 
-defineProps<{
+const props = defineProps<{
   items: MenuItem[]
   groupedItems: Record<string, MenuItem[]> | null
   catLabels: Record<string, string>
+  search: string
 }>()
 
-defineEmits<{ (e: 'add', id: number): void }>()
+const emit = defineEmits<{
+  (e: 'add', id: number): void
+  (e: 'clear-filters'): void
+}>()
 </script>
 
 <template>
-  <div class="flex-1 overflow-y-auto overscroll-contain p-3 sm:p-4 lg:p-5 space-y-5 sm:space-y-6">
+  <div class="flex-1 overflow-y-auto overscroll-contain px-3 py-4 sm:px-4 sm:py-5">
+    <Empty v-if="!props.items.length" class="anim-fade-up border-0 py-10">
+      <EmptyHeader>
+        <EmptyMedia class="bg-muted text-muted-foreground">
+          <SearchX class="size-5" />
+        </EmptyMedia>
+        <EmptyTitle class="text-section">Nothing matches that</EmptyTitle>
+        <EmptyDescription class="text-body">
+          <span v-if="props.search">No menu item is called “{{ props.search }}”.</span>
+          <span v-else>That category is empty.</span>
+        </EmptyDescription>
+      </EmptyHeader>
+      <Button variant="outline" size="sm" @click="emit('clear-filters')">Clear filters</Button>
+    </Empty>
 
-    <div v-if="!items.length" class="anim-fade-up px-2">
-      <UAlert
-        color="neutral"
-        variant="soft"
-        icon="i-heroicons-magnifying-glass"
-        title="No items found"
-        description="Try a different search or category."
-      />
-    </div>
-
-    <!-- Grouped view -->
-    <template v-else-if="groupedItems">
-      <div v-for="(group, cat) in groupedItems" :key="cat" class="anim-fade-in">
-        <p class="text-xs font-medium mb-2 sm:mb-3 tracking-wide" style="color: var(--text-muted)">{{ catLabels[cat] }}</p>
-        <TransitionGroup name="menu-card" tag="div" class="relative grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-3">
+    <!-- Grouped: one section per category -->
+    <template v-else-if="props.groupedItems">
+      <section
+        v-for="(group, cat) in props.groupedItems"
+        :key="cat"
+        class="anim-fade-in mb-6 last:mb-0"
+      >
+        <h2 class="text-label mb-2.5 text-muted-foreground">
+          {{ props.catLabels[cat] ?? cat }}
+        </h2>
+        <TransitionGroup
+          name="list"
+          tag="div"
+          class="relative grid grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-3 xl:grid-cols-4"
+        >
           <MenuCard
-            v-for="(item, i) in group"
+            v-for="item in group"
             :key="item.id"
             :item="item"
-            :style="{ '--stagger': `${Math.min(i, 10) * 32}ms` }"
-            @add="$emit('add', $event)"
+            @add="emit('add', $event)"
           />
         </TransitionGroup>
-      </div>
+      </section>
     </template>
 
-    <!-- Filtered single category view -->
+    <!-- Flat: a single category or a search result -->
     <template v-else>
-      <TransitionGroup name="menu-card" tag="div" class="relative grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-3">
+      <TransitionGroup
+        name="list"
+        tag="div"
+        class="relative grid grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-3 xl:grid-cols-4"
+      >
         <MenuCard
-          v-for="(item, i) in items"
+          v-for="item in props.items"
           :key="item.id"
           :item="item"
-          :style="{ '--stagger': `${Math.min(i, 12) * 32}ms` }"
-          @add="$emit('add', $event)"
+          @add="emit('add', $event)"
         />
       </TransitionGroup>
     </template>
-
   </div>
 </template>
