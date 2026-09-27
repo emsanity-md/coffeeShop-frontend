@@ -6,7 +6,6 @@
  * There is deliberately no `class` prop: the root is a single element, so Vue's
  * attribute fallthrough already handles class/aria from the call site.
  */
-import { Coffee } from '@lucide/vue'
 import { SITE } from '~/constants/site'
 
 withDefaults(defineProps<{
@@ -26,7 +25,7 @@ withDefaults(defineProps<{
       class="flex shrink-0 items-center justify-center rounded-lg bg-primary/12 text-primary transition-colors group-hover:bg-primary/20"
       :class="size === 'md' ? 'size-9' : 'size-7'"
     >
-      <Coffee :class="size === 'md' ? 'size-5' : 'size-4'" />
+      <BrandMark :class="size === 'md' ? 'size-5' : 'size-4'" />
     </span>
     <span class="flex flex-col leading-none">
       <span

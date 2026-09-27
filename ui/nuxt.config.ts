@@ -11,6 +11,17 @@ export default defineNuxtConfig({
 
   app: {
     pageTransition: { name: 'page', mode: 'out-in' },
+    // Without these the browser falls back to a bare /favicon.ico request, so
+    // the tab icon silently stayed whatever that file happened to be. The SVG
+    // is the master; the .ico entry is only there for the fallback path.
+    // Regenerate with `npm run favicon:build`.
+    head: {
+      link: [
+        { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' },
+        { rel: 'icon', type: 'image/x-icon', sizes: '16x16 32x32 48x48', href: '/favicon.ico' },
+        { rel: 'apple-touch-icon', sizes: '180x180', href: '/apple-touch-icon.png' },
+      ],
+    },
   },
 
   components: [
